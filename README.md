@@ -57,7 +57,14 @@ flowchart TB
 
         subgraph DATA_PLATFORM [Self-Hosted Streaming & Lakehouse Platform]
             direction TB
-            REDPANDA[Redpanda Cluster<br/>High-Throughput C++ Broker]
+            
+            subgraph INGESTION_BUS [Ingestion & CDC Transport]
+                direction LR
+                DEBEZIUM[Debezium CDC Engine<br/>PostgreSQL Logical Replication WAL]
+                REDPANDA[Redpanda Cluster<br/>High-Throughput C++ Broker]
+                DEBEZIUM -->|Stream Avro / JSON Mutation Events| REDPANDA
+            end
+
             FLINK[Apache Flink<br/>Event-Time Streaming Engine]
             AIRFLOW[Apache Airflow<br/>Batch DAG Orchestrator]
             
@@ -106,8 +113,8 @@ flowchart TB
     end
 
     %% Ingestion into Broker & Apps
-    PG -.->|CDC / WAL Stream| REDPANDA
-    DUWIT_DB -.->|Edge Sync Stream| REDPANDA
+    PG -.->|Logical WAL Log Decoding| DEBEZIUM
+    DUWIT_DB -.->|Edge Webhook / Change Feed| REDPANDA
     CLOUD_FEEDS -->|Tickers, Order Books & Filings| REDPANDA
     CLOUD_FEEDS -->|Direct Price Feeds & Trade Orders| CUANTUM
 
@@ -123,7 +130,7 @@ flowchart TB
 
 #### Streaming & Lakehouse
 * **Self-Hosted Data Platform** — 100% on-premise, containerized lakehouse and columnar analytics engine:
-  * **Event Streaming & Ingestion**: **Redpanda** (low-latency C++ event broker ingesting CDC streams from PostgreSQL, Vercel edge syncs, and multi-venue market feeds: Binance, Bitget, Yahoo Finance, and IDX) and **Apache Airflow** (batch DAG orchestration).
+  * **Event Streaming & Ingestion**: **Debezium CDC Engine** (capturing PostgreSQL logical WAL mutation logs without query overhead) and **Redpanda** (low-latency C++ event broker ingesting CDC streams, Vercel edge syncs, and multi-venue market feeds: Binance, Bitget, Yahoo Finance, and IDX), orchestrated by **Apache Airflow**.
   * **Stream Processing**: **Apache Flink** (stateful event-time surveillance, rolling window aggregations, and sub-second sinks into ClickHouse and MinIO).
   * **Storage & Batch Lakehouse**: **MinIO** (S3-compatible local lakehouse) and **Apache Spark on K8s** (distributed feature transformations and Delta Lake table ACID format).
   * **OLAP Analytics & dbt Modeling**: **ClickHouse** (high-concurrency columnar analytics warehouse) transformed via **dbt Core** (`dbt-clickhouse` adapter) for automated staging, intermediate metrics, and dimensional data marts.
@@ -149,7 +156,7 @@ flowchart TB
 ### Tech Stack
 
 ```
-Streaming & Big Data : Apache Flink, Apache Spark, Redpanda, Apache Airflow, Kafka, Delta Lake, dbt Core
+Streaming & Big Data : Apache Flink, Apache Spark, Redpanda, Debezium CDC, Apache Airflow, Kafka, Delta Lake, dbt Core
 Storage & Lakehouse  : ClickHouse, MinIO, PostgreSQL 16, DuckDB, TimescaleDB, Redis 7
 Data Modeling        : dbt-clickhouse, Medallion Architecture, Dimensional Modeling (Star Schema)
 Market & Feeds       : Binance WS/REST, Bitget CCXT, Yahoo Finance, IDX Financial Reports
