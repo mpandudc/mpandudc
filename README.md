@@ -16,90 +16,105 @@ MBA Candidate in Business Leadership Executive at SBM ITB. B.Eng. in Computer En
 
 ```mermaid
 flowchart TB
-    subgraph INGRESS [Ingress & Network]
+    subgraph INGRESS [Ingress & Private Mesh]
         direction LR
         CF[Cloudflare Tunnel]
         TS[Tailscale Mesh]
         DNS[AdGuard Home DNS]
     end
 
-    subgraph CLOUD_FEEDS [External Cloud Sources & Market Feeds]
-        direction TB
-        EX_BINANCE[Binance API / WS]
-        EX_BITGET[Bitget CCXT / WS]
-        EX_YFINANCE[Yahoo Finance & Macro]
-        EX_IDX[IDX Financial Disclosures]
+    subgraph SOURCES [Data Ingestion Sources]
+        direction LR
+        subgraph CLOUD_FEEDS [External Market & Financial Feeds]
+            direction TB
+            EX_BINANCE[Binance API / WS]
+            EX_BITGET[Bitget CCXT / WS]
+            EX_YFINANCE[Yahoo Finance & Macro]
+            EX_IDX[IDX Financial Reports]
+        end
+        subgraph CLOUD_EDGE [Cloud Edge: Vercel Serverless]
+            direction TB
+            DUWIT[duwit Web & API]
+            DUWIT_DB[(Vercel Postgres)]
+            DUWIT <--> DUWIT_DB
+        end
     end
 
-    subgraph CLOUD_EDGE [Cloud Edge: Vercel Serverless]
+    subgraph HOMESERVER [Local Infrastructure & Execution]
         direction TB
-        DUWIT[duwit Web & API]
-        DUWIT_DB[(Vercel Postgres)]
-        DUWIT <--> DUWIT_DB
+
+        subgraph APPS_OPS [Operational Trading Engine & State]
+            direction TB
+            CUANTUM[cuantum Trading Engine]
+            N8N[n8n Automations]
+            PG[(PostgreSQL 16 Operational)]
+            REDIS[(Redis 7 State Cache)]
+
+            CUANTUM <--> PG
+            CUANTUM <--> REDIS
+            N8N --> CUANTUM
+        end
+
+        subgraph DATA_PLATFORM [Self-Hosted Streaming & Lakehouse Platform]
+            direction TB
+            REDPANDA[Redpanda Cluster<br/>High-Throughput C++ Broker]
+            FLINK[Apache Flink<br/>Event-Time Streaming Engine]
+            AIRFLOW[Apache Airflow<br/>Batch DAG Orchestrator]
+            
+            subgraph STORAGE_LAYER [Storage & Lake]
+                direction LR
+                MINIO[(MinIO Object Lake<br/>Parquet & Delta Tables)]
+                CLICKHOUSE[(ClickHouse OLAP<br/>Columnar Analytics Warehouse)]
+            end
+
+            SPARK[Apache Spark on K8s<br/>Distributed Batch Compute & ML]
+            DBT[dbt Core<br/>dbt-clickhouse Model Compiler]
+            METABASE[Metabase BI<br/>Operational Analytics Dashboards]
+
+            %% Streaming Pipeline
+            REDPANDA -->|Event Streams| FLINK
+            FLINK -->|Real-Time Analytics Marts| CLICKHOUSE
+            FLINK -->|Raw Event Bronze Sink| MINIO
+
+            %% Batch Orchestration & Processing
+            AIRFLOW -->|Schedule Batch & ML Runs| SPARK
+            AIRFLOW -->|Trigger Mart Transformations| DBT
+            SPARK <-->|Read / Write Delta Format| MINIO
+            SPARK -.->|Load Enriched Parquet| CLICKHOUSE
+
+            %% Transformation & Serving
+            DBT -->|Materialize Staging & Marts| CLICKHOUSE
+            CLICKHOUSE -->|Sub-Second SQL Queries| METABASE
+        end
+
+        subgraph AI_KNOWLEDGE [Autonomous Systems & Knowledge Hub]
+            direction TB
+            HERMES[Hermes Multi-Agent Runtime]
+            ROUTER[Context & Model Gateway]
+            VAULT_MCP[vault-mcp Server]
+            NLM_MCP[notebooklm-fastmcp Server]
+            OBSIDIAN[(Obsidian Second Brain)]
+            NLM_ENGINE[(NotebookLM Long-Context Engine)]
+
+            HERMES --> ROUTER
+            HERMES --> VAULT_MCP
+            HERMES --> NLM_MCP
+            VAULT_MCP <-->|Two-Tier Hybrid Search| OBSIDIAN
+            NLM_MCP <-->|Direct Ingest & Podcast Gen| NLM_ENGINE
+            HERMES -.->|Risk Evaluation & Execution Rules| CUANTUM
+        end
     end
 
-    subgraph APPS_OPS [Homeserver: Operational Services]
-        direction TB
-        CUANTUM[cuantum Trading Engine]
-        N8N[n8n Automations]
-        PG[(PostgreSQL 16)]
-        REDIS[(Redis 7)]
+    %% Ingestion into Broker & Apps
+    PG -.->|CDC / WAL Stream| REDPANDA
+    DUWIT_DB -.->|Edge Sync Stream| REDPANDA
+    CLOUD_FEEDS -->|Tickers, Order Books & Filings| REDPANDA
+    CLOUD_FEEDS -->|Direct Price Feeds & Trade Orders| CUANTUM
 
-        CUANTUM <--> PG
-        CUANTUM <--> REDIS
-        N8N --> CUANTUM
-    end
-
-    subgraph DATA_PLATFORM [Data Platform: Self-Hosted Streaming & Lakehouse]
-        direction TB
-        REDPANDA[Redpanda Cluster]
-        FLINK[Apache Flink]
-        AIRFLOW[Apache Airflow]
-        MINIO[(MinIO Object Lake)]
-        SPARK[Apache Spark on K8s<br/>Data Engineering & MLflow]
-        CLICKHOUSE[(ClickHouse OLAP<br/>Columnar Analytics Warehouse)]
-        DBT[dbt Core<br/>dbt-clickhouse SQL Compiler]
-        METABASE[Metabase BI]
-
-        PG -.->|CDC / WAL Events| REDPANDA
-        DUWIT_DB -.->|Edge Sync / Event Feeds| REDPANDA
-        CLOUD_FEEDS -->|Market Tickers & Order Books| REDPANDA
-        CLOUD_FEEDS -->|Price Feeds & Executions| CUANTUM
-        
-        REDPANDA -->|Stream Ingest| FLINK
-        FLINK -->|Real-time Mart Sink| CLICKHOUSE
-        FLINK -->|Raw Parquet Sinks| MINIO
-        
-        AIRFLOW -->|Orchestrate Batch & ML| SPARK
-        AIRFLOW -->|Trigger Models Run| DBT
-        SPARK <-->|Delta Tables & Models| MINIO
-        
-        DBT -->|Compile & Materialize Marts| CLICKHOUSE
-        CLICKHOUSE -->|Sub-second Analytical SQL| METABASE
-    end
-
-    subgraph AI_KNOWLEDGE [Autonomous Systems & Knowledge Hub]
-        direction TB
-        HERMES[Hermes Multi-Agent Engine]
-        ROUTER[Model & Context Router]
-        VAULT_MCP[vault-mcp]
-        NLM_MCP[notebooklm-fastmcp]
-        OBSIDIAN[(Obsidian Vault)]
-        NLM_ENGINE[(NotebookLM Long-Context)]
-
-        HERMES --> ROUTER
-        HERMES --> VAULT_MCP
-        HERMES --> NLM_MCP
-        VAULT_MCP <-->|Hybrid Search| OBSIDIAN
-        NLM_MCP <-->|Document Ingest| NLM_ENGINE
-        HERMES -.->|Risk Rules & Analysis| CUANTUM
-    end
-
-    CF --> CUANTUM
-    CF --> ROUTER
-    TS --> DATA_PLATFORM
-    TS --> AI_KNOWLEDGE
-    TS --> APPS_OPS
+    %% Ingress Connections
+    CF -->|Public Web Access| CUANTUM
+    CF -->|Gateway Access| ROUTER
+    TS -->|Private Tailnet Mesh| HOMESERVER
 ```
 
 ---
