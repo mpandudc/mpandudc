@@ -100,14 +100,18 @@ flowchart TB
             ROUTER[Context & Model Gateway]
             VAULT_MCP[vault-mcp Server]
             NLM_MCP[notebooklm-fastmcp Server]
+            PROXMOX_MCP[proxmox-homelab-mcp Server]
             OBSIDIAN[(Obsidian Second Brain)]
             NLM_ENGINE[(NotebookLM Long-Context Engine)]
+            PVE_HOST[(Proxmox VE Cluster & LXCs)]
 
             HERMES --> ROUTER
             HERMES --> VAULT_MCP
             HERMES --> NLM_MCP
+            HERMES --> PROXMOX_MCP
             VAULT_MCP <-->|Two-Tier Hybrid Search| OBSIDIAN
             NLM_MCP <-->|Direct Ingest & Podcast Gen| NLM_ENGINE
+            PROXMOX_MCP <-->|LXC Lifecycle, Snapshots & Stats| PVE_HOST
             HERMES -.->|Risk Evaluation & Execution Rules| CUANTUM
         end
     end
@@ -141,6 +145,7 @@ flowchart TB
 * **[flink-vs-spark-benchmark](https://github.com/mpandudc/flink-vs-spark-benchmark)** — Benchmark comparing throughput, backpressure handling, and event-time latency between Apache Flink and Spark Structured Streaming.
 
 #### AI Systems & Agent Tooling
+* **[proxmox-homelab-mcp](https://github.com/mpandudc/proxmox-homelab-mcp)** — FastMCP server for Proxmox VE & Homelab cluster ops. Direct LXC container lifecycle (`start`/`stop`/`reboot`), point-in-time snapshots, service health inspection, and Tailscale mesh status.
 * **[notebooklm-fastmcp](https://github.com/mpandudc/notebooklm-fastmcp)** — FastMCP server for Google NotebookLM. Direct-path ingestion (zero chat token consumption), Google Master Token auto-reminting, 1-shot audio deep dives, and Obsidian note generation.
 * **[obsidian-hybrid-rag-mcp](https://github.com/mpandudc/obsidian-hybrid-rag-mcp)** — MCP server for Obsidian Second Brain. Two-Tier Hybrid RAG (FTS5 BM25 + dense BGE-M3 vector + Jina cross-encoder reranking) with in-memory caching.
 
