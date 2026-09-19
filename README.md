@@ -14,11 +14,51 @@ Currently pursuing an **MBA in Business Leadership Executive at SBM ITB** to bri
 
 ### 🌐 Hybrid Data Platform & Systems Architecture
 
-A distributed hybrid architecture pairing high-throughput event streaming, an analytical batch lakehouse, autonomous multi-agent execution, and personal knowledge retrieval:
-
-<p align="center">
-  <img src="./architecture.svg" alt="Hybrid Data Platform and Systems Architecture" width="100%" />
-</p>
+```
++-------------------------------------------------------------------------------------------------------------------------------+
+|                                    EDGE INGRESS: Cloudflare Zero Trust Tunnel  |  Tailscale Mesh                              |
++-------------------------------------------------------------------------------------------------------------------------------+
+                                                    |
+         +------------------------------------------+-----------------------------------------+
+         |                                                                                    |
+         v                                                                                    v
++-------------------------------------------------------------+   +-------------------------------------------------------------+
+|               1. INGESTION & EVENT STREAMING                |   |                2. PROCESSING & LAKEHOUSE                    |
++-------------------------------------------------------------+   +-------------------------------------------------------------+
+|  [ Ingress Sources ]                                        |   |  [ Stream Processing ]                                      |
+|    |--> Exchange Feeds (Orderbook / Tickers)                |   |    |--> Apache Flink (Low-Latency Stream / Wash-Surveillance)|
+|    |--> App Transaction CDC & Event Traces                  |   |                                                             |
+|                                                             |   |  [ Batch & Lakehouse Compute ]                              |
+|  [ Event Streaming Bus ]                                    |   |    |--> Apache Spark (Distributed Batch & ML Features)      |
+|    |--> Redpanda (Kafka C++ Engine / Low-Latency Ingestion) |   |    |--> Databricks (Unified Lakehouse Compute)              |
+|                                                             |   |                                                             |
+|  [ Batch Orchestrator ]                                     |   |  [ Analytical Storage & Warehouse ]                         |
+|    |--> Apache Airflow (Scheduled Pipelines & Lake DAGs)    |   |    |--> MinIO (Local S3-Compatible Object Lakehouse)        |
+|                                                             |   |    |--> Snowflake (Cloud Analytics Data Warehouse)          |
+|                                                             |   |                                                             |
+|                                                             |   |  [ Business Intelligence & Serving ]                        |
+|                                                             |   |    |--> Metabase (KPI Dashboards & Risk Reporting)          |
++-------------------------------------------------------------+   +-------------------------------------------------------------+
+                                                    |
+         +------------------------------------------+-----------------------------------------+
+         |                                                                                    |
+         v                                                                                    v
++-------------------------------------------------------------+   +-------------------------------------------------------------+
+|              3. AUTONOMOUS AI & KNOWLEDGE HUB               |   |            4. EXECUTION & OPERATIONAL SERVICES              |
++-------------------------------------------------------------+   +-------------------------------------------------------------+
+|  [ Multi-Agent Runtime ]                                    |   |  [ Trading & Analytics Platforms ]                          |
+|    |--> Hermes Multi-Agent System (Autonomous Goal Loops)   |   |    |--> cuantum (Private Algorithmic Execution Engine)      |
+|    |--> Context & Model Gateway (Adaptive Routing)          |   |    |--> duwit (Personal Financial Analytics Suite)          |
+|                                                             |   |                                                             |
+|  [ Grounded Second-Brain MCPs ]                             |   |  [ Operational State & Infrastructure ]                     |
+|    |--> vault-mcp (Two-Tier Hybrid RAG: BM25 + BGE-M3 Dense)|   |    |--> PostgreSQL 16 (Ledger & Transactional Persistence)  |
+|    |--> notebooklm-fastmcp (Zero-Token Bypass & Podcast Gen)|   |    |--> Redis 7 (In-Memory Orderbook Cache & PubSub)        |
+|                                                             |   |    |--> n8n (Event-Driven Operational Webhook Pipelines)    |
+|  [ Knowledge Stores ]                                       |   |    |--> AdGuard Home (Tailnet-wide DNS Security Policy)     |
+|    |--> Obsidian Vault (Local Bidirectional Markdown Notes) |   |                                                             |
+|    |--> Google NotebookLM (1-2M Context Engine)             |   |                                                             |
++-------------------------------------------------------------+   +-------------------------------------------------------------+
+```
 
 ---
 
