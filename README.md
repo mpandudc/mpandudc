@@ -1,29 +1,43 @@
-# Hi there, I'm Pandu 👋
+# Muhammad Pandu Dwi Cahyo
 
-[![LinkedIn](https://img.shields.io/badge/linkedin-%230077B5.svg?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/mpandudc/)
-[![Instagram](https://img.shields.io/badge/instagram-%23E4405F.svg?style=flat&logo=instagram&logoColor=white)](https://www.instagram.com/mpandudc/)
-[![Website](https://img.shields.io/badge/website-mpandudc.com-orange.svg?style=flat&logo=google-chrome&logoColor=white)](https://mpandudc.com)
-[![Data Engineering](https://img.shields.io/badge/Specialty-Data%20Engineering-blue)](https://www.linkedin.com/in/mpandudc/)
+<p align="left">
+  <a href="https://linkedin.com/in/mpandudc"><img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=flat&logo=linkedin&logoColor=white" alt="LinkedIn" /></a>
+  <a href="https://mpandudc.com"><img src="https://img.shields.io/badge/Website-mpandudc.com-2ea44f?style=flat&logo=google-chrome&logoColor=white" alt="Website" /></a>
+  <a href="mailto:mpandudc@gmail.com"><img src="https://img.shields.io/badge/Email-mpandudc%40gmail.com-blue?style=flat&logo=gmail&logoColor=white" alt="Email" /></a>
+</p>
 
-I'm an experienced Data Engineer Supervisor with over 4 years of dedicated service in building robust data pipelines, cloud infrastructure, and distributed computing frameworks, specializing in the fintech and cryptocurrency industries. Proficient in big data architecture, stream processing, workflow automation, and analytical systems optimization. Committed to collaborative leadership, engineering excellence, and translating data into strategic business value.
+Data Engineer Supervisor with 4+ years of experience engineering high-throughput streaming pipelines, distributed data platforms, and cloud infrastructure across fintech and cryptocurrency domains. MBA Candidate at SBM ITB bridging large-scale technical systems with business strategy and data-driven product execution.
 
-## More about me
+---
 
-* 🏢 **Current Focus:** Leading data engineering frameworks and optimizing pipeline operations within the fintech and cryptocurrency sectors.
-* 🎓 **Academic Pursuit:** Deepening my strategic business insights as an MBA Candidate at the School of Business and Management, ITB (SBM ITB).
-* 🔭 **Technical Exploration:** Investigating advanced operational strategies to manage peak demand and systems elasticity.
-* 🌐 **Personal Website:** Explore my complete portfolio, projects, and tech blogs at [mpandudc.com](https://mpandudc.com).
-* 🤝 **Open to Collaboration:** Excited to partner on massive-scale distributed architectures and end-to-end automation systems.
-* 💬 **Tech Talks:** Reach out if you want to geek out over **Apache Airflow, Spark, Flink, Kubernetes, Snowflake, or AWS**.
-* 📫 **Let's Connect:** You can easily reach me through my [LinkedIn Profile](https://www.linkedin.com/in/mpandudc/).
-* ⚡ **Fun Fact:** I balance the analytical world of data with a creative passion for travel journaling and minimalist line art!
+### 🛠️ Core Engineering Stack
 
-## List of skills I'm proud of
+```
+Data & Streaming  : Apache Spark, Apache Flink, Apache Airflow, Kafka, dbt
+Storage & Lake    : Snowflake, PostgreSQL, Redis, Delta Lake, Iceberg
+Cloud & Infra     : AWS (EMR, S3, Glue, Lambda), Kubernetes, Docker, Terraform
+Languages         : Python, SQL, Rust, Bash
+```
 
-1. Python
-2. SQL
-3. Apache Airflow
-4. Apache Spark & Flink
-5. Kubernetes
-6. Snowflake
-7. Amazon Web Services (AWS)
+---
+
+### 🚀 Featured Systems & Open Source
+
+* **[notebooklm-fastmcp](https://github.com/mpandudc/notebooklm-fastmcp)** — Lean FastMCP (Model Context Protocol) server for Google NotebookLM. Designed for AI agents with 1-shot audio deep dives, Google Master Token auto-reminting, and native Obsidian Second Brain sync.
+* **[obsidian-hybrid-rag-mcp](https://github.com/mpandudc/obsidian-hybrid-rag-mcp)** — Production-grade FastMCP server running Two-Tier Hybrid RAG (FTS5 BM25 + BGE-M3 dense embeddings + Jina cross-encoder reranking) with sub-second retrieval over private Markdown vaults.
+* **[cuantum](https://github.com/mpandudc/cuantum)** — Self-hosted algorithmic crypto trading signal & execution platform (FastAPI, SQLAlchemy async, React/TypeScript, CCXT, Binance/Bitget).
+* **[duwit](https://github.com/mpandudc/duwit)** — Modern personal financial analytics engine and expense tracking suite built on Next.js, Drizzle ORM, and automated reconciliation pipelines.
+
+---
+
+### 🎓 Background & Education
+
+* **MBA Candidate** — School of Business and Management, Institut Teknologi Bandung (SBM ITB)
+* **B.Eng. in Computer Engineering** — Universitas Brawijaya
+
+---
+
+<p align="left">
+  <img src="https://github-readme-stats.vercel.app/api?username=mpandudc&show_icons=true&theme=tokyonight&hide_border=true&count_private=true" height="150" alt="GitHub Stats" />
+  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=mpandudc&layout=compact&theme=tokyonight&hide_border=true" height="150" alt="Top Languages" />
+</p>
