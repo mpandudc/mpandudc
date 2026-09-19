@@ -3,7 +3,7 @@
 <p align="left">
   <a href="https://linkedin.com/in/mpandudc"><img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=flat&logo=linkedin&logoColor=white" alt="LinkedIn" /></a>
   <a href="https://mpandudc.com"><img src="https://img.shields.io/badge/Website-mpandudc.com-2ea44f?style=flat&logo=google-chrome&logoColor=white" alt="Website" /></a>
-  <a href="mailto:mpandudc@gmail.com"><img src="https://img.shields.io/badge/Email-mpandudc%40gmail.com-blue?style=flat&logo=gmail&logoColor=white" alt="Email" /></a>
+  <a href="mailto:mpandudc%40gmail.com"><img src="https://img.shields.io/badge/Email-mpandudc%40gmail.com-blue?style=flat&logo=gmail&logoColor=white" alt="Email" /></a>
 </p>
 
 Data Engineer Supervisor focused on high-throughput streaming pipelines (10K+ RPS) and distributed analytical platforms in fintech/crypto (CFX, Pintu). Experienced in production Flink, Spark on K8s, Airflow orchestration, and Snowflake/AWS infrastructure.
@@ -27,17 +27,24 @@ flowchart TB
         direction TB
         REDPANDA[Redpanda Cluster]
         FLINK[Apache Flink]
-        SPARK[Apache Spark / Databricks]
         AIRFLOW[Apache Airflow]
         MINIO[(MinIO Object Store)]
-        SNOWFLAKE[(Snowflake Warehouse)]
+        
+        subgraph COMPUTE_SPLIT [Workload-Split Compute Engines]
+            SPARK[Apache Spark on K8s<br/>Data Engineering & Lake Pipelines]
+            DATABRICKS[Databricks Lakehouse<br/>Distributed ML & Feature Store]
+        end
+        
+        SNOWFLAKE[(Snowflake Warehouse<br/>Governed Semantic Marts)]
         METABASE[Metabase BI]
 
         REDPANDA -->|Stream Events| FLINK
-        AIRFLOW -->|Orchestrate Batch| SPARK
-        SPARK -->|Write Medallion Layers| MINIO
-        SPARK -->|Load Warehouse| SNOWFLAKE
-        SNOWFLAKE --> METABASE
+        AIRFLOW -->|Orchestrate Pipelines| SPARK
+        AIRFLOW -->|Trigger ML Jobs| DATABRICKS
+        SPARK -->|Medallion Parquet| MINIO
+        DATABRICKS -->|Delta Tables & ML Features| MINIO
+        SPARK -->|Load Cleaned Marts| SNOWFLAKE
+        SNOWFLAKE -->|High-Concurrency SQL| METABASE
         MINIO --> METABASE
     end
 
@@ -84,10 +91,13 @@ flowchart TB
 ### Systems & Projects
 
 #### Streaming & Lakehouse
-* **Hybrid Data Platform** — Production dual-engine pipeline:
-  * **Event Streaming & Ingestion**: **Redpanda** (low-latency event bus) and **Apache Airflow** (batch DAG orchestration).
-  * **Processing & Computation**: **Apache Flink** (stateful event-time surveillance) and **Apache Spark / Databricks** (batch ETL, ML feature pipelines, Delta Lake).
-  * **Storage & Warehouse**: **MinIO** (S3-compatible local lakehouse) and **Snowflake** (analytical warehouse).
+* **Hybrid Data Platform** — Dual-engine architecture with workload-split compute:
+  * **Event Streaming & Ingestion**: **Redpanda** (low-latency C++ event bus) and **Apache Airflow** (batch DAG orchestration).
+  * **Stream Analytics**: **Apache Flink** (stateful event-time surveillance and wash-trading detection).
+  * **Workload-Split Compute (Databricks vs. Snowflake)**:
+    * **Databricks / Spark**: Dedicated to **heavy distributed ML training, feature store parity, and iterative PySpark batch compute** on spot-instance clusters. Avoids Snowflake's high per-credit cost for long-running iterative algorithms.
+    * **Snowflake**: Dedicated to **governed analytics data warehousing, high-concurrency SQL serving, and enterprise RBAC**. Eliminates compute lock-in by decoupling heavy data science training from business intelligence workloads.
+  * **Storage & Warehouse**: **MinIO** (S3-compatible local lakehouse) and **Snowflake** (analytical serving warehouse).
   * **BI & Serving**: **Metabase** (KPI metrics and operational risk dashboards).
 * **[flink-market-surveillance](https://github.com/mpandudc/flink-market-surveillance)** — Event-time market surveillance, wash-trading pattern detection, and deterministic replay harness built with Apache Flink and Kafka.
 * **[spark-delta-lakehouse](https://github.com/mpandudc/spark-delta-lakehouse)** — Spark Structured Streaming with Delta Lakehouse Medallion architecture and ACID transactions.
