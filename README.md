@@ -101,6 +101,7 @@ flowchart TB
             VAULT_MCP[vault-mcp Server]
             NLM_MCP[notebooklm-fastmcp Server]
             PROXMOX_MCP[proxmox-homelab-mcp Server]
+            WORKSTATION_MCP[workstation-remote-mcp Server]
             OBSIDIAN[(Obsidian Second Brain)]
             NLM_ENGINE[(NotebookLM Long-Context Engine)]
             PVE_HOST[(Proxmox VE Cluster & LXCs)]
@@ -109,6 +110,7 @@ flowchart TB
             HERMES --> VAULT_MCP
             HERMES --> NLM_MCP
             HERMES --> PROXMOX_MCP
+            HERMES --> WORKSTATION_MCP
             VAULT_MCP <-->|Two-Tier Hybrid Search| OBSIDIAN
             NLM_MCP <-->|Direct Ingest & Podcast Gen| NLM_ENGINE
             PROXMOX_MCP <-->|LXC Lifecycle, Snapshots & Stats| PVE_HOST
@@ -143,8 +145,12 @@ flowchart TB
 
     %% Ingress Connections
     CF -->|Public Web Access| CUANTUM
+    CF -->|Public Web Access| PAIRDROP[PairDrop P2P Transfer]
+    CF -->|Telemetry Dashboard| GRAF
     CF -->|Gateway Access| ROUTER
     TS -->|Private Tailnet Mesh| HOMESERVER
+    TS -->|Unattended Mgmt & WoL| MPDC_PC[MPDC-PC Workstation]
+    WORKSTATION_MCP <-->|WoL & SSH Automation| MPDC_PC
 ```
 
 ---
