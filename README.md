@@ -12,90 +12,100 @@ Currently pursuing an **MBA in Business Leadership Executive at SBM ITB** to bri
 
 ---
 
-### 🌐 Homelab & Autonomous Systems Topology
+### 🌐 Distributed Systems & Homelab Topology
 
-A high-availability, self-hosted homelab environment (Intel i5-8500T 6C / 32GB RAM Proxmox node) running a hybrid multi-agent AI framework, algorithmic trading execution engine, and second-brain retrieval pipelines:
+A hybrid self-hosted private cloud powering autonomous AI agents, quantitative execution engines, local data lakehouse pipelines, and second-brain retrieval:
 
 ```mermaid
 flowchart TB
-    subgraph WAN [Secure Ingress & Edge]
+    subgraph WAN [Edge & Ingress]
         CF[Cloudflare Edge / Tunnel]
-        TS[Tailscale Mesh Network]
+        TS[Tailscale Private Mesh]
     end
 
-    subgraph PROXMOX [Proxmox VE Node - homelab]
+    subgraph HOMELAB [Private Infrastructure Node]
         direction TB
 
-        subgraph LXC_INGEST [LXC 203: AI Engine & Knowledge Gateway]
-            H_GATEWAY["Hermes Agent Runtime\n(Multi-Agent Daemon)"]
-            H_ROSTER["Agent Roster:\n@hermes (Knowledge) | @coder (SRE) | @quant (Trading)"]
-            R9["9router LLM Gateway"]
+        subgraph AI_LAYER [AI Agent & Knowledge Gateway]
+            H_ROSTER["Hermes Multi-Agent Hub\n@hermes (Knowledge) | @coder (SRE) | @quant (Trading)"]
+            R9["9router LLM Context Gateway"]
             V_MCP["vault-mcp (FastMCP)\nTwo-Tier Hybrid RAG (BGE-M3 + BM25)"]
             NLM_MCP["notebooklm-fastmcp (FastMCP)\nGoogle Master Token & 1-Shot Audio Deep Dive"]
         end
 
-        subgraph LXC_EXEC [LXC 201: Quantitative Trading & Automation]
+        subgraph QUANT_LAYER [Execution & Workflow Automation]
             CUANTUM["cuantum (Private)\nFastAPI Async + React + CCXT\nBinance/Bitget Bracket Execution"]
-            N8N["n8n Automation Engine\nWorkflow & Webhook Pipelines"]
+            N8N["n8n Automation Engine\nEvent-Driven Webhook Pipelines"]
         end
 
-        subgraph LXC_STORAGE [LXC 205: State & Persistence Engine]
-            PG[(PostgreSQL 16\nTrading Ledger & State)]
-            REDIS[(Redis 7\nCache & PubSub)]
+        subgraph DATA_LAYER [Data Platform & Lakehouse Lab]
+            AIRFLOW["Apache Airflow\nBatch Orchestration & Data Pipelines"]
+            MINIO["MinIO Object Storage\nS3-Compatible Local Data Lake"]
+            DUCKDB["DuckDB & dbt Engine\nIn-Process Analytics & Lake Transformations"]
+            PG[(PostgreSQL\nTransactional State & App DB)]
+            REDIS[(Redis\nHigh-Throughput Cache & PubSub)]
         end
 
-        subgraph LXC_NET [LXC 204 & 206: Dev & Network Core]
-            ADGUARD["AdGuard Home DNS\n(Tailnet-wide DNS Filter)"]
-            DE_LAB["Data Engineering Lab\n(Docker, Python 3.12, uv)"]
+        subgraph NET_LAYER [Network & DNS Infrastructure]
+            ADGUARD["AdGuard Home DNS\n(Tailnet-wide DNS Security)"]
         end
     end
 
-    subgraph STORAGE_EXT [External Knowledge & Data Lakes]
+    subgraph EXTERNAL [External Knowledge & Data Providers]
         OBSIDIAN[("Obsidian Vault\nSecond Brain (Local Markdown)")]
         G_NLM[("Google NotebookLM\n1-2M Context Engine")]
         EXCHANGES[("Exchanges API\nBinance / Bitget WebSocket")]
     end
 
-    %% Ingress Routes
+    %% Network Routing
     CF --> CUANTUM
     CF --> R9
-    TS --> LXC_INGEST
-    TS --> LXC_STORAGE
-    TS --> ADGUARD
+    TS --> AI_LAYER
+    TS --> DATA_LAYER
+    TS --> NET_LAYER
 
-    %% Interconnects
-    H_GATEWAY --- H_ROSTER
-    H_ROSTER -->|Query Context| V_MCP
+    %% AI & Second Brain Pipeline
+    H_ROSTER -->|Context Retrieval| V_MCP
     H_ROSTER -->|Document Grounding| NLM_MCP
-    V_MCP <-->|Sub-second Rerank| OBSIDIAN
-    NLM_MCP <-->|Zero-Token Bypass| G_NLM
-    
-    H_ROSTER -->|Strategy Evaluation| CUANTUM
-    CUANTUM <-->|Order & Balance State| PG
+    V_MCP <-->|Sub-Second Hybrid Search| OBSIDIAN
+    NLM_MCP <-->|Direct Ingest Bypass| G_NLM
+
+    %% Quantitative Trading Pipeline
+    H_ROSTER -->|Risk & Strategy Evaluation| CUANTUM
+    CUANTUM <-->|Execution State| PG
     CUANTUM <-->|Live Ticker Cache| REDIS
-    CUANTUM <-->|Real-time Execution| EXCHANGES
+    CUANTUM <-->|Market Data Ingress| EXCHANGES
     N8N -->|Trigger Automation| CUANTUM
+
+    %% Data Engineering Lakehouse Pipeline
+    AIRFLOW -->|Orchestrate Ingestion| MINIO
+    AIRFLOW -->|Run Transformations| DUCKDB
+    DUCKDB <-->|Lakehouse Storage| MINIO
+    AIRFLOW -->|Sync Trading History| PG
 ```
 
 ---
 
-### 🚀 Ecosystem & Featured Systems
+### 🚀 Systems & Projects
 
 #### 🤖 AI Engineering & Autonomous Agents
-* **[notebooklm-fastmcp](https://github.com/mpandudc/notebooklm-fastmcp)** — Lean FastMCP server for Google NotebookLM. Engineered for zero-token context offloading, Google Master Token (AAS) auto-reminting, 1-shot audio podcast generation, and Obsidian sync.
+* **[notebooklm-fastmcp](https://github.com/mpandudc/notebooklm-fastmcp)** — Lean FastMCP server for Google NotebookLM. Built for zero-token context offloading, Google Master Token (AAS) auto-reminting, 1-shot audio deep dives, and Obsidian sync.
 * **[obsidian-hybrid-rag-mcp](https://github.com/mpandudc/obsidian-hybrid-rag-mcp)** — High-performance MCP server delivering Two-Tier Hybrid RAG (FTS5 BM25 + dense BGE-M3 1024-dim vector + Jina cross-encoder reranking) with sub-second retrieval over private Markdown knowledge bases.
 
 #### 📈 Quantitative Trading & Financial Systems
 * **[cuantum](https://github.com/mpandudc/cuantum)** *(Private)* — Self-hosted algorithmic crypto trading signal and order execution platform. Built on FastAPI, SQLAlchemy async, React/TypeScript, and CCXT. Features automated bracket execution and risk management across Binance and Bitget.
-* **[duwit](https://github.com/mpandudc/duwit)** — Modern personal financial analytics engine and expense tracking suite built on Next.js, Drizzle ORM, and automated transaction reconciliation pipelines.
+* **[duwit](https://github.com/mpandudc/duwit)** — Personal financial analytics engine and expense tracking suite built on Next.js, Drizzle ORM, and automated transaction reconciliation pipelines.
+
+#### 🏗️ Data Engineering & Lakehouse Lab
+* **Data Platform Stack** *(Private / Self-Hosted)* — Local lakehouse and data pipeline lab leveraging **Apache Airflow**, **MinIO (S3-compatible object storage)**, and **DuckDB/dbt** to ingest, store, and transform market tickers and trading records into parquet-based analytical layers.
 
 ---
 
 ### 🛠️ Core Engineering Stack
 
 ```
-Streaming & Big Data : Apache Flink, Apache Spark, Apache Airflow, Kafka, Apache Hudi, Iceberg
-Data Warehouses      : Snowflake, BigQuery, PostgreSQL, TimescaleDB, Redis
+Streaming & Big Data : Apache Flink, Apache Spark, Apache Airflow, Kafka, Apache Hudi, Iceberg, dbt
+Storage & Lakehouse  : Snowflake, BigQuery, MinIO, PostgreSQL, DuckDB, TimescaleDB, Redis
 Cloud & Distributed  : AWS (EMR, S3, Glue, Lambda, Athena), Kubernetes, Docker, Terraform
 Languages            : Python, SQL, C/C++, Rust, Bash
 Architecture         : Medallion Architecture, CDC (Debezium/DMS), High-throughput Ingestion (10K+ RPS)
