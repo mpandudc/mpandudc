@@ -114,6 +114,25 @@ flowchart TB
             PROXMOX_MCP <-->|LXC Lifecycle, Snapshots & Stats| PVE_HOST
             HERMES -.->|Risk Evaluation & Execution Rules| CUANTUM
         end
+
+        subgraph OBSERVABILITY [Homelab Telemetry & Observability]
+            direction TB
+            MONITORING_LXC[(LXC 207: Monitoring)]
+            PROM[Prometheus Scraper :9090]
+            GRAF[Grafana Dashboards :3000]
+            CADV[cAdvisor Container Stats :8080]
+            KUMA[Uptime Kuma Health :3001]
+            DISCORD_BOT[Discord Sentinel Bot<br/>#server-status]
+
+            MONITORING_LXC --> PROM
+            MONITORING_LXC --> GRAF
+            MONITORING_LXC --> CADV
+            MONITORING_LXC --> KUMA
+            MONITORING_LXC --> DISCORD_BOT
+            PVE_HOST -.->|Node Exporter :9100| PROM
+            CADV --> PROM
+            PROM --> GRAF
+        end
     end
 
     %% Ingestion into Broker & Apps
