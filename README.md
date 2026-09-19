@@ -50,19 +50,15 @@ flowchart TB
         N8N --> CUANTUM
     end
 
-    subgraph DATA_PLATFORM [Data Platform: Streaming & Lakehouse]
+    subgraph DATA_PLATFORM [Data Platform: Self-Hosted Streaming & Lakehouse]
         direction TB
         REDPANDA[Redpanda Cluster]
         FLINK[Apache Flink]
         AIRFLOW[Apache Airflow]
-        MINIO[(MinIO Object Store)]
-        
-        subgraph COMPUTE_SPLIT [Workload-Split Compute Engines]
-            SPARK[Apache Spark on K8s<br/>Data Engineering & Batch Pipelines]
-            DATABRICKS[Databricks Lakehouse<br/>Distributed ML & Feature Store]
-        end
-        
-        SNOWFLAKE[(Snowflake Warehouse<br/>Governed Semantic Marts)]
+        MINIO[(MinIO Object Lake)]
+        SPARK[Apache Spark on K8s<br/>Data Engineering & MLflow]
+        CLICKHOUSE[(ClickHouse OLAP<br/>Columnar Analytics Warehouse)]
+        DBT[dbt Core<br/>dbt-clickhouse SQL Compiler]
         METABASE[Metabase BI]
 
         PG -.->|CDC / WAL Events| REDPANDA
@@ -71,16 +67,15 @@ flowchart TB
         CLOUD_FEEDS -->|Price Feeds & Executions| CUANTUM
         
         REDPANDA -->|Stream Ingest| FLINK
-        FLINK -->|Real-time Features / Aggregations| DATABRICKS
-        FLINK -->|Curated Streaming Sinks| SNOWFLAKE
+        FLINK -->|Real-time Mart Sink| CLICKHOUSE
         FLINK -->|Raw Parquet Sinks| MINIO
-        AIRFLOW -->|Orchestrate Batch DAGs| SPARK
-        AIRFLOW -->|Trigger Distributed ML| DATABRICKS
-        SPARK -->|Medallion Parquet| MINIO
-        DATABRICKS -->|Delta Tables & Model Store| MINIO
-        SPARK -->|Load Cleaned Marts| SNOWFLAKE
-        SNOWFLAKE -->|High-Concurrency SQL| METABASE
-        MINIO --> METABASE
+        
+        AIRFLOW -->|Orchestrate Batch & ML| SPARK
+        AIRFLOW -->|Trigger Models Run| DBT
+        SPARK <-->|Delta Tables & Models| MINIO
+        
+        DBT -->|Compile & Materialize Marts| CLICKHOUSE
+        CLICKHOUSE -->|Sub-second Analytical SQL| METABASE
     end
 
     subgraph AI_KNOWLEDGE [Autonomous Systems & Knowledge Hub]
@@ -112,14 +107,12 @@ flowchart TB
 ### Systems & Projects
 
 #### Streaming & Lakehouse
-* **Hybrid Data Platform** — Dual-engine architecture with workload-split compute:
-  * **Event Streaming & Ingestion**: **Redpanda** (low-latency C++ event bus ingesting CDC streams from PostgreSQL, Vercel edge syncs, and multi-venue market feeds: Binance, Bitget, Yahoo Finance, and IDX) and **Apache Airflow** (batch DAG orchestration).
-  * **Stream Processing**: **Apache Flink** (stateful event-time surveillance and real-time feature transformations feeding directly into Databricks and Snowflake).
-  * **Workload-Split Compute (Databricks vs. Snowflake)**:
-    * **Databricks / Spark**: Dedicated to **heavy distributed ML training, feature store parity, and iterative PySpark batch compute** on spot-instance clusters. Avoids Snowflake's high per-credit cost for long-running iterative algorithms.
-    * **Snowflake**: Dedicated to **governed analytics data warehousing, high-concurrency SQL serving, and enterprise RBAC**. Eliminates compute lock-in by decoupling heavy data science training from business intelligence workloads.
-  * **Storage & Warehouse**: **MinIO** (S3-compatible local lakehouse) and **Snowflake** (analytical serving warehouse).
-  * **BI & Serving**: **Metabase** (KPI metrics and operational risk dashboards).
+* **Self-Hosted Data Platform** — 100% on-premise, containerized lakehouse and columnar analytics engine:
+  * **Event Streaming & Ingestion**: **Redpanda** (low-latency C++ event broker ingesting CDC streams from PostgreSQL, Vercel edge syncs, and multi-venue market feeds: Binance, Bitget, Yahoo Finance, and IDX) and **Apache Airflow** (batch DAG orchestration).
+  * **Stream Processing**: **Apache Flink** (stateful event-time surveillance, rolling window aggregations, and sub-second sinks into ClickHouse and MinIO).
+  * **Storage & Batch Lakehouse**: **MinIO** (S3-compatible local lakehouse) and **Apache Spark on K8s** (distributed feature transformations and Delta Lake table ACID format).
+  * **OLAP Analytics & dbt Modeling**: **ClickHouse** (high-concurrency columnar analytics warehouse) transformed via **dbt Core** (`dbt-clickhouse` adapter) for automated staging, intermediate metrics, and dimensional data marts.
+  * **BI & Serving**: **Metabase** (sub-second SQL dashboards for trading performance and operational metrics).
 * **[flink-market-surveillance](https://github.com/mpandudc/flink-market-surveillance)** — Event-time market surveillance, wash-trading pattern detection, and deterministic replay harness built with Apache Flink and Kafka.
 * **[spark-delta-lakehouse](https://github.com/mpandudc/spark-delta-lakehouse)** — Spark Structured Streaming with Delta Lakehouse Medallion architecture and ACID transactions.
 * **[streaming-ml-features](https://github.com/mpandudc/streaming-ml-features)** — Streaming ML feature store parity engine ensuring zero-drift between online and offline feature generation.
@@ -141,13 +134,14 @@ flowchart TB
 ### Tech Stack
 
 ```
-Streaming & Big Data : Apache Flink, Apache Spark, Redpanda, Apache Airflow, Kafka, Delta Lake, dbt
-Storage & Lakehouse  : Snowflake, Databricks, MinIO, PostgreSQL, DuckDB, TimescaleDB, Redis
+Streaming & Big Data : Apache Flink, Apache Spark, Redpanda, Apache Airflow, Kafka, Delta Lake, dbt Core
+Storage & Lakehouse  : ClickHouse, MinIO, PostgreSQL 16, DuckDB, TimescaleDB, Redis 7
+Data Modeling        : dbt-clickhouse, Medallion Architecture, Dimensional Modeling (Star Schema)
 Market & Feeds       : Binance WS/REST, Bitget CCXT, Yahoo Finance, IDX Financial Reports
 BI & Serving         : Metabase, Grafana
 Cloud & Infra        : AWS (EMR, S3, Glue, Lambda, Athena), Kubernetes, Docker, Vercel, Terraform
 Languages            : Python, SQL, TypeScript, C/C++, Rust, Bash
-Architecture         : Medallion Architecture, CDC (Debezium/DMS), Streaming ML Parity, High-throughput (10K+ RPS)
+Architecture         : CDC (Debezium/DMS), Streaming ML Parity, High-throughput (10K+ RPS)
 ```
 
 ---
