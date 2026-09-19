@@ -6,99 +6,118 @@
   <a href="mailto:mpandudc@gmail.com"><img src="https://img.shields.io/badge/Email-mpandudc%40gmail.com-blue?style=flat&logo=gmail&logoColor=white" alt="Email" /></a>
 </p>
 
-**Data Engineer Supervisor** with 4+ years of experience architecting high-throughput, low-latency streaming pipelines (10K+ RPS) and distributed data platforms in fintech and cryptocurrency (CFX, Pintu). Proven record in leading engineering teams, executing Snowflake/AWS migrations (25% compute cost reduction), and orchestrating Apache Flink, Spark, and Airflow on Kubernetes.
+Data Engineer Supervisor focused on high-throughput streaming pipelines (10K+ RPS) and distributed analytical platforms in fintech/crypto (CFX, Pintu). Experienced in production Flink, Spark on K8s, Airflow orchestration, and Snowflake/AWS infrastructure.
 
-Currently pursuing an **MBA in Business Leadership Executive at SBM ITB** to bridge large-scale distributed data systems with strategic business growth, regulatory compliance, and quantitative product execution.
+MBA Candidate in Business Leadership Executive at SBM ITB. B.Eng. in Computer Engineering from Universitas Brawijaya (Cum Laude, 3.93/4.00).
 
 ---
 
-### 🌐 Hybrid Data Platform & Systems Architecture
+### Systems Architecture
 
+```mermaid
+flowchart TB
+    subgraph INGRESS [Ingress & Network]
+        direction LR
+        CF[Cloudflare Tunnel]
+        TS[Tailscale Mesh]
+        DNS[AdGuard Home DNS]
+    end
+
+    subgraph DATA_PLATFORM [Data Platform: Streaming & Lakehouse]
+        direction TB
+        REDPANDA[Redpanda Cluster]
+        FLINK[Apache Flink]
+        SPARK[Apache Spark / Databricks]
+        AIRFLOW[Apache Airflow]
+        MINIO[(MinIO Object Store)]
+        SNOWFLAKE[(Snowflake Warehouse)]
+        METABASE[Metabase BI]
+
+        REDPANDA -->|Stream Events| FLINK
+        AIRFLOW -->|Orchestrate Batch| SPARK
+        SPARK -->|Write Medallion Layers| MINIO
+        SPARK -->|Load Warehouse| SNOWFLAKE
+        SNOWFLAKE --> METABASE
+        MINIO --> METABASE
+    end
+
+    subgraph AI_KNOWLEDGE [Autonomous Systems & Knowledge Hub]
+        direction TB
+        HERMES[Hermes Multi-Agent Engine]
+        ROUTER[Model & Context Router]
+        VAULT_MCP[vault-mcp]
+        NLM_MCP[notebooklm-fastmcp]
+        OBSIDIAN[(Obsidian Vault)]
+        NLM_ENGINE[(NotebookLM Long-Context)]
+
+        HERMES --> ROUTER
+        HERMES --> VAULT_MCP
+        HERMES --> NLM_MCP
+        VAULT_MCP <-->|Hybrid Search| OBSIDIAN
+        NLM_MCP <-->|Document Ingest| NLM_ENGINE
+    end
+
+    subgraph APPS_OPS [Trading & Execution Services]
+        direction TB
+        CUANTUM[cuantum]
+        DUWIT[duwit]
+        N8N[n8n Automations]
+        PG[(PostgreSQL 16)]
+        REDIS[(Redis 7)]
+
+        CUANTUM <--> PG
+        CUANTUM <--> REDIS
+        FLINK -.->|Signals / Feeds| CUANTUM
+        HERMES -.->|Risk Evaluation| CUANTUM
+        N8N --> CUANTUM
+    end
+
+    CF --> CUANTUM
+    CF --> ROUTER
+    TS --> DATA_PLATFORM
+    TS --> AI_KNOWLEDGE
+    TS --> APPS_OPS
 ```
-+-------------------------------------------------------------------------------------------------------------------------------+
-|                                    EDGE INGRESS: Cloudflare Zero Trust Tunnel  |  Tailscale Mesh                              |
-+-------------------------------------------------------------------------------------------------------------------------------+
-                                                    |
-         +------------------------------------------+-----------------------------------------+
-         |                                                                                    |
-         v                                                                                    v
-+-------------------------------------------------------------+   +-------------------------------------------------------------+
-|               1. INGESTION & EVENT STREAMING                |   |                2. PROCESSING & LAKEHOUSE                    |
-+-------------------------------------------------------------+   +-------------------------------------------------------------+
-|  [ Ingress Sources ]                                        |   |  [ Stream Processing ]                                      |
-|    |--> Exchange Feeds (Orderbook / Tickers)                |   |    |--> Apache Flink (Low-Latency Stream / Wash-Surveillance)|
-|    |--> App Transaction CDC & Event Traces                  |   |                                                             |
-|                                                             |   |  [ Batch & Lakehouse Compute ]                              |
-|  [ Event Streaming Bus ]                                    |   |    |--> Apache Spark (Distributed Batch & ML Features)      |
-|    |--> Redpanda (Kafka C++ Engine / Low-Latency Ingestion) |   |    |--> Databricks (Unified Lakehouse Compute)              |
-|                                                             |   |                                                             |
-|  [ Batch Orchestrator ]                                     |   |  [ Analytical Storage & Warehouse ]                         |
-|    |--> Apache Airflow (Scheduled Pipelines & Lake DAGs)    |   |    |--> MinIO (Local S3-Compatible Object Lakehouse)        |
-|                                                             |   |    |--> Snowflake (Cloud Analytics Data Warehouse)          |
-|                                                             |   |                                                             |
-|                                                             |   |  [ Business Intelligence & Serving ]                        |
-|                                                             |   |    |--> Metabase (KPI Dashboards & Risk Reporting)          |
-+-------------------------------------------------------------+   +-------------------------------------------------------------+
-                                                    |
-         +------------------------------------------+-----------------------------------------+
-         |                                                                                    |
-         v                                                                                    v
-+-------------------------------------------------------------+   +-------------------------------------------------------------+
-|              3. AUTONOMOUS AI & KNOWLEDGE HUB               |   |            4. EXECUTION & OPERATIONAL SERVICES              |
-+-------------------------------------------------------------+   +-------------------------------------------------------------+
-|  [ Multi-Agent Runtime ]                                    |   |  [ Trading & Analytics Platforms ]                          |
-|    |--> Hermes Multi-Agent System (Autonomous Goal Loops)   |   |    |--> cuantum (Private Algorithmic Execution Engine)      |
-|    |--> Context & Model Gateway (Adaptive Routing)          |   |    |--> duwit (Personal Financial Analytics Suite)          |
-|                                                             |   |                                                             |
-|  [ Grounded Second-Brain MCPs ]                             |   |  [ Operational State & Infrastructure ]                     |
-|    |--> vault-mcp (Two-Tier Hybrid RAG: BM25 + BGE-M3 Dense)|   |    |--> PostgreSQL 16 (Ledger & Transactional Persistence)  |
-|    |--> notebooklm-fastmcp (Zero-Token Bypass & Podcast Gen)|   |    |--> Redis 7 (In-Memory Orderbook Cache & PubSub)        |
-|                                                             |   |    |--> n8n (Event-Driven Operational Webhook Pipelines)    |
-|  [ Knowledge Stores ]                                       |   |    |--> AdGuard Home (Tailnet-wide DNS Security Policy)     |
-|    |--> Obsidian Vault (Local Bidirectional Markdown Notes) |   |                                                             |
-|    |--> Google NotebookLM (1-2M Context Engine)             |   |                                                             |
-+-------------------------------------------------------------+   +-------------------------------------------------------------+
-```
 
 ---
 
-### 🚀 Systems & Projects
+### Systems & Projects
 
-#### 📊 Real-Time Streaming & Analytical Lakehouse
-* **Target Hybrid Data Platform** *(Streaming & Batching)*:
-  * **Event Streaming & Ingestion**: **Redpanda** (Kafka-compatible, C++ engine for zero-JVM high-throughput event ingestion) & **Apache Airflow** (orchestrating scheduled extractions and batch ELT DAGs).
-  * **Processing & Transformation**: **Apache Flink** (low-latency stateful stream processing, CEP market surveillance) & **Apache Spark / Databricks** (large-scale distributed batch compute, ML feature pipelines, Delta Lake ACID).
-  * **Storage & Warehouse**: **MinIO** (local S3-compatible object lakehouse) & **Snowflake** (cloud analytics data warehouse).
-  * **Business Intelligence & Serving**: **Metabase** (KPI metrics, quantitative reporting, risk dashboards).
-* **[flink-market-surveillance](https://github.com/mpandudc/flink-market-surveillance)** — Event-time market surveillance, wash-trading pattern detection, and deterministic replay harness built on Apache Flink and Kafka.
-* **[spark-delta-lakehouse](https://github.com/mpandudc/spark-delta-lakehouse)** — Replay-safe Spark Structured Streaming and Delta Lakehouse implementation using ACID transactions and Medallion architecture.
-* **[streaming-ml-features](https://github.com/mpandudc/streaming-ml-features)** — Online and offline streaming ML feature store parity system ensuring zero-drift feature computation and backfill replay.
-* **[flink-vs-spark-benchmark](https://github.com/mpandudc/flink-vs-spark-benchmark)** — Reproducible streaming benchmark comparing throughput, backpressure handling, and end-to-end event-time latency between Apache Flink and Spark Structured Streaming.
+#### Streaming & Lakehouse
+* **Hybrid Data Platform** — Production dual-engine pipeline:
+  * **Event Streaming & Ingestion**: **Redpanda** (low-latency event bus) and **Apache Airflow** (batch DAG orchestration).
+  * **Processing & Computation**: **Apache Flink** (stateful event-time surveillance) and **Apache Spark / Databricks** (batch ETL, ML feature pipelines, Delta Lake).
+  * **Storage & Warehouse**: **MinIO** (S3-compatible local lakehouse) and **Snowflake** (analytical warehouse).
+  * **BI & Serving**: **Metabase** (KPI metrics and operational risk dashboards).
+* **[flink-market-surveillance](https://github.com/mpandudc/flink-market-surveillance)** — Event-time market surveillance, wash-trading pattern detection, and deterministic replay harness built with Apache Flink and Kafka.
+* **[spark-delta-lakehouse](https://github.com/mpandudc/spark-delta-lakehouse)** — Spark Structured Streaming with Delta Lakehouse Medallion architecture and ACID transactions.
+* **[streaming-ml-features](https://github.com/mpandudc/streaming-ml-features)** — Streaming ML feature store parity engine ensuring zero-drift between online and offline feature generation.
+* **[flink-vs-spark-benchmark](https://github.com/mpandudc/flink-vs-spark-benchmark)** — Benchmark comparing throughput, backpressure handling, and event-time latency between Apache Flink and Spark Structured Streaming.
 
-#### 🤖 AI Engineering & Autonomous Agents
-* **[notebooklm-fastmcp](https://github.com/mpandudc/notebooklm-fastmcp)** — Lean FastMCP server for Google NotebookLM. Built for zero-token context offloading, Google Master Token (AAS) auto-reminting, 1-shot audio deep dives, and Obsidian sync.
-* **[obsidian-hybrid-rag-mcp](https://github.com/mpandudc/obsidian-hybrid-rag-mcp)** — High-performance MCP server delivering Two-Tier Hybrid RAG (FTS5 BM25 + dense BGE-M3 1024-dim vector + Jina cross-encoder reranking) with sub-second retrieval over private Markdown knowledge bases.
+#### AI Systems & Agent Tooling
+* **[notebooklm-fastmcp](https://github.com/mpandudc/notebooklm-fastmcp)** — FastMCP server for Google NotebookLM. Direct-path ingestion (zero chat token consumption), Google Master Token auto-reminting, 1-shot audio deep dives, and Obsidian note generation.
+* **[obsidian-hybrid-rag-mcp](https://github.com/mpandudc/obsidian-hybrid-rag-mcp)** — MCP server for Obsidian Second Brain. Two-Tier Hybrid RAG (FTS5 BM25 + dense BGE-M3 vector + Jina cross-encoder reranking) with in-memory caching.
 
-#### 📈 Quantitative Trading & Financial Systems
-* **[cuantum](https://github.com/mpandudc/cuantum)** *(Private)* — Self-hosted algorithmic crypto trading signal and order execution platform. Built on FastAPI, SQLAlchemy async, React/TypeScript, and CCXT. Features automated bracket execution and risk management across Binance and Bitget.
-* **[duwit](https://github.com/mpandudc/duwit)** — Personal financial analytics engine and expense tracking suite built on Next.js, Drizzle ORM, and automated transaction reconciliation pipelines.
+#### Trading & Applications
+* **[cuantum](https://github.com/mpandudc/cuantum)** *(Private)* — Algorithmic crypto trading platform. FastAPI, SQLAlchemy async, React/TS, and CCXT. Automated bracket execution and position risk management across Binance and Bitget.
+* **[duwit](https://github.com/mpandudc/duwit)** — Financial tracking and analytics app built with Next.js, Drizzle ORM, and automated transaction reconciliation pipelines.
 
 ---
 
-### 🛠️ Core Engineering Stack
+### Tech Stack
 
 ```
 Streaming & Big Data : Apache Flink, Apache Spark, Redpanda, Apache Airflow, Kafka, Delta Lake, dbt
 Storage & Lakehouse  : Snowflake, Databricks, MinIO, PostgreSQL, DuckDB, TimescaleDB, Redis
 BI & Serving         : Metabase, Grafana
-Cloud & Distributed  : AWS (EMR, S3, Glue, Lambda, Athena), Kubernetes, Docker, Terraform
+Cloud & Infra        : AWS (EMR, S3, Glue, Lambda, Athena), Kubernetes, Docker, Terraform
 Languages            : Python, SQL, C/C++, Rust, Bash
-Architecture         : Medallion Architecture, CDC (Debezium/DMS), Streaming ML Feature Parity, High-throughput (10K+ RPS)
+Architecture         : Medallion Architecture, CDC (Debezium/DMS), Streaming ML Parity, High-throughput (10K+ RPS)
 ```
 
 ---
 
-### 🎓 Background & Education
+### Education
 
-* **Master of Business Administration (MBA)** — School of Business and Management, Institut Teknologi Bandung (SBM ITB) *(Business Leadership Executive)*
-* **Bachelor of Engineering (B.Eng.) in Computer Engineering** — Universitas Brawijaya *(Cum Laude, CGPA 3.93/4.00)*
+* **MBA in Business Leadership Executive** — School of Business and Management, Institut Teknologi Bandung (SBM ITB)
+* **B.Eng. in Computer Engineering** — Universitas Brawijaya *(Cum Laude, CGPA 3.93/4.00)*
