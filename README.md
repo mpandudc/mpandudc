@@ -23,9 +23,9 @@ flowchart TD
         direction TB
         subgraph S_INGRESS ["Public Ingress, DNS & Private Mesh"]
             direction LR
-            CF["Cloudflare Tunnel<br/>(cuantum, drop, grafana, router)"]
-            DNS["AdGuard Home DNS<br/>(LXC 204: Network-Wide Filter)"]
-            TS["Tailscale Private Mesh<br/>(WireGuard CGNAT 100.x)"]
+            CF["Cloudflare Tunnel<br/>(Edge SSL Ingress)"]
+            DNS["AdGuard Home DNS<br/>(Network-Wide Filter)"]
+            TS["Tailscale Private Mesh<br/>(WireGuard CGNAT)"]
             CF --- DNS --- TS
         end
         subgraph S_FEEDS ["External Market Feeds & Edge Services"]
@@ -43,13 +43,13 @@ flowchart TD
     subgraph S_CORE ["Level 2: Core Homelab Services & Observability"]
         direction LR
 
-        subgraph COL_TRADING ["Operational Trading & Utility (LXC 201, 202, 205)"]
+        subgraph COL_TRADING ["Operational Trading & Utility"]
             direction TB
             CUANTUM["cuantum Trading Engine<br/>(FastAPI + React Vite)"]
-            N8N["n8n Workflow Automations<br/>(LXC 202)"]
-            PAIRDROP["PairDrop Web P2P Transfer<br/>(LXC 202: drop.mpandudc.com)"]
-            PG[("PostgreSQL 16 Operational<br/>(LXC 205: trading db)")]
-            REDIS[("Redis 7 State Cache<br/>(LXC 205)")]
+            N8N["n8n Workflow Automations"]
+            PAIRDROP["PairDrop Web P2P Transfer"]
+            PG[("PostgreSQL Operational DB")]
+            REDIS[("Redis State Cache")]
 
             CUANTUM <--> PG
             CUANTUM <--> REDIS
@@ -57,14 +57,14 @@ flowchart TD
             PAIRDROP
         end
 
-        subgraph COL_OBS ["Observability & Telemetry (LXC 207)"]
+        subgraph COL_OBS ["Observability & Telemetry"]
             direction TB
-            MONITOR_LXC[("LXC 207: Observability Hub")]
-            PROM["Prometheus Scraper (:9090)<br/>(15s Pull Interval)"]
-            GRAF["Grafana Dashboards (:3000)<br/>(grafana.mpandudc.com)"]
-            CADV["cAdvisor Container Stats (:8080)"]
-            KUMA["Uptime Kuma Health (:3001)"]
-            DISCORD["Discord Sentinel Bot<br/>(#server-status 1546523710889136259)"]
+            MONITOR_LXC[("Telemetry Hub")]
+            PROM["Prometheus Metrics Scraper"]
+            GRAF["Grafana Dashboards"]
+            CADV["cAdvisor Container Metrics"]
+            KUMA["Uptime Kuma Health Checker"]
+            DISCORD["Discord Sentinel Bot<br/>(#server-status)"]
 
             MONITOR_LXC --> PROM
             MONITOR_LXC --> GRAF
@@ -79,12 +79,12 @@ flowchart TD
     %% ==========================================
     %% LEVEL 3: DATA PLATFORM & LAKEHOUSE
     %% ==========================================
-    subgraph S_DATA ["Level 3: Self-Hosted Streaming & Lakehouse Platform (LXC 206)"]
+    subgraph S_DATA ["Level 3: Self-Hosted Streaming & Lakehouse Platform"]
         direction TB
 
         subgraph DP_INGEST ["1. Ingestion & CDC Transport Layer"]
             direction LR
-            DEBEZIUM["Debezium CDC Engine<br/>(PostgreSQL WAL Logical Decoding)"]
+            DEBEZIUM["Debezium CDC Engine<br/>(PostgreSQL WAL Replication)"]
             REDPANDA["Redpanda Cluster<br/>(High-Throughput C++ Broker)"]
             DEBEZIUM -->|Stream Mutation Events| REDPANDA
         end
@@ -101,10 +101,10 @@ flowchart TD
             direction TB
             subgraph COMPUTE_ROW ["Batch & Storage Engines"]
                 direction LR
-                SPARK["Apache Spark on K8s<br/>(Batch Compute & Feature Eng)"]
+                SPARK["Apache Spark on K8s<br/>(Batch Compute & ML)"]
                 AIRFLOW["Apache Airflow<br/>(Batch DAG Orchestrator)"]
                 CLICKHOUSE[("ClickHouse OLAP<br/>(Columnar Warehouse)")]
-                DBT["dbt Core Compiler<br/>(dbt-clickhouse Models)"]
+                DBT["dbt Core Compiler<br/>(Data Modeling)"]
                 METABASE["Metabase BI<br/>(Analytics Dashboards)"]
             end
 
@@ -124,13 +124,13 @@ flowchart TD
     subgraph S_AI ["Level 4: Autonomous Systems, Second Brain & Workstation Remote"]
         direction LR
 
-        subgraph COL_AGENT ["Hermes Multi-Agent Stack (LXC 203)"]
+        subgraph COL_AGENT ["Hermes Multi-Agent Stack"]
             direction TB
             HERMES["Hermes Agent Runtime<br/>(@hermes, @coder, @quant)"]
-            ROUTER["9router Context Gateway<br/>(router.mpandudc.com)"]
+            ROUTER["9router Context Gateway"]
             OBSIDIAN[("Obsidian Second Brain<br/>(Hybrid Knowledge Graph)")]
             NLM_ENGINE[("NotebookLM Engine<br/>(Google Gemini Long-Context)")]
-            PVE_API[("Proxmox VE Host<br/>(i5-8500T 6C/6T, 32GB RAM)")]
+            PVE_API[("Proxmox VE Host<br/>(Intel i5, 32GB RAM)")]
 
             HERMES --> ROUTER
             HERMES -.->|Risk Rules & Signal Eval| CUANTUM
@@ -138,11 +138,11 @@ flowchart TD
 
         subgraph COL_MCP ["FastMCP Tools & Workstation Control"]
             direction TB
-            VAULT_MCP["vault-mcp Server<br/>(Two-Tier Hybrid BM25 + BGE-M3)"]
+            VAULT_MCP["vault-mcp Server<br/>(Two-Tier Hybrid BM25 + Vector)"]
             NLM_MCP["notebooklm-fastmcp Server<br/>(Direct Ingest & Studio Audio)"]
-            PROXMOX_MCP["proxmox-homelab-mcp Server<br/>(pvesh API, Snapshots & Stats)"]
+            PROXMOX_MCP["proxmox-homelab-mcp Server<br/>(Lifecycle, Snapshots & Stats)"]
             WORKSTATION_MCP["workstation-remote-mcp Server<br/>(WoL, SSH & Power Control)"]
-            MPDC_PC["MPDC-PC Workstation<br/>(Windows 11 Pro, RTX / CUDA)"]
+            MPDC_PC["MPDC-PC Workstation<br/>(Windows 11, CUDA/RTX)"]
 
             HERMES --> VAULT_MCP <--> OBSIDIAN
             HERMES --> NLM_MCP <--> NLM_ENGINE
@@ -158,7 +158,7 @@ flowchart TD
     FEEDS_CRYPTO -->|Market Tickers & Order Books| REDPANDA
     DUWIT -.->|Webhook Sync / Change Feed| REDPANDA
     PG -.->|Logical WAL Replication| DEBEZIUM
-    PVE_API -.->|Node Exporter :9100| PROM
+    PVE_API -.->|Node Exporter Hardware Metrics| PROM
     CF -->|Public Routing| CUANTUM
     CF -->|Public Routing| PAIRDROP
     CF -->|Public Routing| GRAF
