@@ -23,17 +23,22 @@ flowchart TB
         DNS[AdGuard Home DNS]
     end
 
-    subgraph APPS_OPS [Operational Services & Transactional State]
+    subgraph CLOUD_EDGE [Cloud Edge: Vercel Serverless]
+        direction TB
+        DUWIT[duwit Web & API]
+        DUWIT_DB[(Vercel Postgres)]
+        DUWIT <--> DUWIT_DB
+    end
+
+    subgraph APPS_OPS [Homeserver: Operational Services]
         direction TB
         CUANTUM[cuantum]
-        DUWIT[duwit]
         N8N[n8n Automations]
         PG[(PostgreSQL 16)]
         REDIS[(Redis 7)]
 
         CUANTUM <--> PG
         CUANTUM <--> REDIS
-        DUWIT --> PG
         N8N --> CUANTUM
     end
 
@@ -53,6 +58,7 @@ flowchart TB
         METABASE[Metabase BI]
 
         PG -.->|CDC / WAL Events| REDPANDA
+        DUWIT_DB -.->|Edge Sync / Event Feeds| REDPANDA
         REDPANDA -->|Stream Ingest| FLINK
         FLINK -->|Real-time Features / Aggregations| DATABRICKS
         FLINK -->|Curated Streaming Sinks| SNOWFLAKE
@@ -96,7 +102,7 @@ flowchart TB
 
 #### Streaming & Lakehouse
 * **Hybrid Data Platform** — Dual-engine architecture with workload-split compute:
-  * **Event Streaming & Ingestion**: **Redpanda** (low-latency C++ event bus ingesting CDC streams from PostgreSQL and trade feeds) and **Apache Airflow** (batch DAG orchestration).
+  * **Event Streaming & Ingestion**: **Redpanda** (low-latency C++ event bus ingesting CDC streams from PostgreSQL, Vercel edge sinks, and trade feeds) and **Apache Airflow** (batch DAG orchestration).
   * **Stream Processing**: **Apache Flink** (stateful event-time surveillance and real-time feature transformations feeding directly into Databricks and Snowflake).
   * **Workload-Split Compute (Databricks vs. Snowflake)**:
     * **Databricks / Spark**: Dedicated to **heavy distributed ML training, feature store parity, and iterative PySpark batch compute** on spot-instance clusters. Avoids Snowflake's high per-credit cost for long-running iterative algorithms.
@@ -114,7 +120,7 @@ flowchart TB
 
 #### Trading & Applications
 * **[cuantum](https://github.com/mpandudc/cuantum)** *(Private)* — Algorithmic crypto trading platform. FastAPI, SQLAlchemy async, React/TS, and CCXT. Automated bracket execution and position risk management across Binance and Bitget.
-* **[duwit](https://github.com/mpandudc/duwit)** — Financial tracking and analytics app built with Next.js, Drizzle ORM, and automated transaction reconciliation pipelines.
+* **[duwit](https://github.com/mpandudc/duwit)** — Financial tracking and analytics app built with Next.js and Drizzle ORM. Fully serverless stack deployed on **Vercel** (Frontend, Serverless Route Handlers, and Vercel Postgres) with automated transaction reconciliation pipelines.
 
 ---
 
@@ -124,8 +130,8 @@ flowchart TB
 Streaming & Big Data : Apache Flink, Apache Spark, Redpanda, Apache Airflow, Kafka, Delta Lake, dbt
 Storage & Lakehouse  : Snowflake, Databricks, MinIO, PostgreSQL, DuckDB, TimescaleDB, Redis
 BI & Serving         : Metabase, Grafana
-Cloud & Infra        : AWS (EMR, S3, Glue, Lambda, Athena), Kubernetes, Docker, Terraform
-Languages            : Python, SQL, C/C++, Rust, Bash
+Cloud & Infra        : AWS (EMR, S3, Glue, Lambda, Athena), Kubernetes, Docker, Vercel, Terraform
+Languages            : Python, SQL, TypeScript, C/C++, Rust, Bash
 Architecture         : Medallion Architecture, CDC (Debezium/DMS), Streaming ML Parity, High-throughput (10K+ RPS)
 ```
 
