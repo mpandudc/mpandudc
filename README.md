@@ -12,9 +12,9 @@ Currently pursuing an **MBA in Business Leadership Executive at SBM ITB** to bri
 
 ---
 
-### 🌐 Distributed Systems & Homelab Topology
+### 🌐 Distributed Systems & Infrastructure Topology
 
-A hybrid self-hosted private cloud powering autonomous AI agents, quantitative execution engines, local data lakehouse pipelines, and second-brain retrieval:
+A hybrid private cloud architecture powering autonomous multi-agent systems, quantitative execution engines, distributed streaming analytics, and local lakehouse pipelines:
 
 ```mermaid
 flowchart TB
@@ -23,38 +23,39 @@ flowchart TB
         TS[Tailscale Private Mesh]
     end
 
-    subgraph HOMELAB [Private Infrastructure Node]
+    subgraph CLOUD_NODE [Private Infrastructure Node]
         direction TB
 
         subgraph AI_LAYER [AI Agent & Knowledge Gateway]
-            H_ROSTER["Hermes Multi-Agent Hub\n@hermes (Knowledge) | @coder (SRE) | @quant (Trading)"]
-            R9["9router LLM Context Gateway"]
-            V_MCP["vault-mcp (FastMCP)\nTwo-Tier Hybrid RAG (BGE-M3 + BM25)"]
-            NLM_MCP["notebooklm-fastmcp (FastMCP)\nGoogle Master Token & 1-Shot Audio Deep Dive"]
+            H_ROSTER["Multi-Agent Runtime\n(Specialized Profiles & Autonomous Task Loops)"]
+            R9["Context & Model Gateway\n(Adaptive Routing & Fallbacks)"]
+            V_MCP["Second-Brain FastMCP\n(Hybrid RAG: Vector + Full-Text Search)"]
+            NLM_MCP["Research FastMCP\n(Long-Context Offloading & Zero-Token Bypass)"]
         end
 
         subgraph QUANT_LAYER [Execution & Workflow Automation]
-            CUANTUM["cuantum (Private)\nFastAPI Async + React + CCXT\nBinance/Bitget Bracket Execution"]
-            N8N["n8n Automation Engine\nEvent-Driven Webhook Pipelines"]
+            CUANTUM["Algorithmic Execution Platform\n(Bracket Orders & Position Sizing Engine)"]
+            N8N["Event Automation Engine\n(Webhooks & Operational Triggers)"]
         end
 
         subgraph DATA_LAYER [Data Platform & Lakehouse Lab]
-            AIRFLOW["Apache Airflow\nBatch Orchestration & Data Pipelines"]
-            MINIO["MinIO Object Storage\nS3-Compatible Local Data Lake"]
-            DUCKDB["DuckDB & dbt Engine\nIn-Process Analytics & Lake Transformations"]
-            PG[(PostgreSQL\nTransactional State & App DB)]
-            REDIS[(Redis\nHigh-Throughput Cache & PubSub)]
+            STREAM_PIPE["Real-time Streaming Engine\n(Event-Time Processing & Market Surveillance)"]
+            AIRFLOW["Batch Orchestrator\n(Scheduled Ingestion & Lake DAGs)"]
+            MINIO["Local Object Lakehouse\n(S3-Compatible Storage)"]
+            LAKE_ENGINE["In-Process Analytics\n(Parquet & Analytical Transformations)"]
+            PG[(Transactional Database\nLedger & State Persistence)]
+            REDIS[(In-Memory Data Store\nTicker Cache & PubSub)]
         end
 
         subgraph NET_LAYER [Network & DNS Infrastructure]
-            ADGUARD["AdGuard Home DNS\n(Tailnet-wide DNS Security)"]
+            ADGUARD["Network DNS Resolver\n(Tailnet DNS Security & Policy Filter)"]
         end
     end
 
     subgraph EXTERNAL [External Knowledge & Data Providers]
-        OBSIDIAN[("Obsidian Vault\nSecond Brain (Local Markdown)")]
-        G_NLM[("Google NotebookLM\n1-2M Context Engine")]
-        EXCHANGES[("Exchanges API\nBinance / Bitget WebSocket")]
+        OBSIDIAN[("Knowledge Vault\nSecond Brain (Local Markdown)")]
+        G_NLM[("Long-Context Engine\n1-2M Document Offload")]
+        EXCHANGES[("Exchange WebSocket / REST\nMarket Feeds & Execution")]
     end
 
     %% Network Routing
@@ -64,24 +65,25 @@ flowchart TB
     TS --> DATA_LAYER
     TS --> NET_LAYER
 
-    %% AI & Second Brain Pipeline
+    %% AI Pipeline
     H_ROSTER -->|Context Retrieval| V_MCP
     H_ROSTER -->|Document Grounding| NLM_MCP
     V_MCP <-->|Sub-Second Hybrid Search| OBSIDIAN
     NLM_MCP <-->|Direct Ingest Bypass| G_NLM
 
-    %% Quantitative Trading Pipeline
+    %% Trading Pipeline
     H_ROSTER -->|Risk & Strategy Evaluation| CUANTUM
     CUANTUM <-->|Execution State| PG
-    CUANTUM <-->|Live Ticker Cache| REDIS
+    CUANTUM <-->|Live Cache| REDIS
     CUANTUM <-->|Market Data Ingress| EXCHANGES
     N8N -->|Trigger Automation| CUANTUM
 
-    %% Data Engineering Lakehouse Pipeline
+    %% Data Lakehouse Pipeline
     AIRFLOW -->|Orchestrate Ingestion| MINIO
-    AIRFLOW -->|Run Transformations| DUCKDB
-    DUCKDB <-->|Lakehouse Storage| MINIO
-    AIRFLOW -->|Sync Trading History| PG
+    STREAM_PIPE -->|Stream Micro-batches| MINIO
+    AIRFLOW -->|Run Transformations| LAKE_ENGINE
+    LAKE_ENGINE <-->|Storage Engine| MINIO
+    AIRFLOW -->|Sync Reconciled Records| PG
 ```
 
 ---
@@ -92,23 +94,27 @@ flowchart TB
 * **[notebooklm-fastmcp](https://github.com/mpandudc/notebooklm-fastmcp)** — Lean FastMCP server for Google NotebookLM. Built for zero-token context offloading, Google Master Token (AAS) auto-reminting, 1-shot audio deep dives, and Obsidian sync.
 * **[obsidian-hybrid-rag-mcp](https://github.com/mpandudc/obsidian-hybrid-rag-mcp)** — High-performance MCP server delivering Two-Tier Hybrid RAG (FTS5 BM25 + dense BGE-M3 1024-dim vector + Jina cross-encoder reranking) with sub-second retrieval over private Markdown knowledge bases.
 
+#### 📊 Real-Time Streaming & Lakehouse Systems
+* **[flink-market-surveillance](https://github.com/mpandudc/flink-market-surveillance)** — Event-time market surveillance, wash-trading pattern detection, and deterministic replay harness built on Apache Flink and Kafka.
+* **[spark-delta-lakehouse](https://github.com/mpandudc/spark-delta-lakehouse)** — Replay-safe Spark Structured Streaming and Delta Lakehouse implementation using ACID transactions and Medallion architecture.
+* **[streaming-ml-features](https://github.com/mpandudc/streaming-ml-features)** — Online and offline streaming ML feature store parity system ensuring zero-drift feature computation and backfill replay.
+* **[flink-vs-spark-benchmark](https://github.com/mpandudc/flink-vs-spark-benchmark)** — Reproducible, fair streaming benchmark comparing throughput, backpressure handling, and end-to-end event-time latency between Apache Flink and Spark Structured Streaming.
+* **Data Platform Lab** *(Private / Self-Hosted)* — Local lakehouse orchestrating **Apache Airflow**, **MinIO**, and **DuckDB/dbt** to ingest, store, and transform market tickers into partitioned analytical layers.
+
 #### 📈 Quantitative Trading & Financial Systems
 * **[cuantum](https://github.com/mpandudc/cuantum)** *(Private)* — Self-hosted algorithmic crypto trading signal and order execution platform. Built on FastAPI, SQLAlchemy async, React/TypeScript, and CCXT. Features automated bracket execution and risk management across Binance and Bitget.
 * **[duwit](https://github.com/mpandudc/duwit)** — Personal financial analytics engine and expense tracking suite built on Next.js, Drizzle ORM, and automated transaction reconciliation pipelines.
-
-#### 🏗️ Data Engineering & Lakehouse Lab
-* **Data Platform Stack** *(Private / Self-Hosted)* — Local lakehouse and data pipeline lab leveraging **Apache Airflow**, **MinIO (S3-compatible object storage)**, and **DuckDB/dbt** to ingest, store, and transform market tickers and trading records into parquet-based analytical layers.
 
 ---
 
 ### 🛠️ Core Engineering Stack
 
 ```
-Streaming & Big Data : Apache Flink, Apache Spark, Apache Airflow, Kafka, Apache Hudi, Iceberg, dbt
+Streaming & Big Data : Apache Flink, Apache Spark, Apache Airflow, Kafka, Apache Hudi, Delta Lake, dbt
 Storage & Lakehouse  : Snowflake, BigQuery, MinIO, PostgreSQL, DuckDB, TimescaleDB, Redis
 Cloud & Distributed  : AWS (EMR, S3, Glue, Lambda, Athena), Kubernetes, Docker, Terraform
 Languages            : Python, SQL, C/C++, Rust, Bash
-Architecture         : Medallion Architecture, CDC (Debezium/DMS), High-throughput Ingestion (10K+ RPS)
+Architecture         : Medallion Architecture, CDC (Debezium/DMS), Streaming ML Feature Parity, High-throughput (10K+ RPS)
 ```
 
 ---
