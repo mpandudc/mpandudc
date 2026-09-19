@@ -16,141 +16,119 @@ MBA Candidate in Business Leadership Executive at SBM ITB. B.Eng. in Computer En
 
 ```mermaid
 flowchart TB
-    subgraph INGRESS [Ingress & Private Mesh]
+    subgraph INGRESS [Ingress, Edge & Mesh]
         direction LR
         CF[Cloudflare Tunnel]
         TS[Tailscale Mesh]
         DNS[AdGuard Home DNS]
+        DUWIT[duwit: Vercel Serverless & Postgres]
     end
 
-    subgraph SOURCES [Data Ingestion Sources]
+    subgraph SOURCES [External Feeds]
         direction LR
-        subgraph CLOUD_FEEDS [External Market & Financial Feeds]
-            direction TB
-            EX_BINANCE[Binance API / WS]
-            EX_BITGET[Bitget CCXT / WS]
-            EX_YFINANCE[Yahoo Finance & Macro]
-            EX_IDX[IDX Financial Reports]
-        end
-        subgraph CLOUD_EDGE [Cloud Edge: Vercel Serverless]
-            direction TB
-            DUWIT[duwit Web & API]
-            DUWIT_DB[(Vercel Postgres)]
-            DUWIT <--> DUWIT_DB
-        end
+        EX_CRYPTO[Binance & Bitget CCXT / WS]
+        EX_MACRO[Yahoo Finance & IDX Reports]
     end
 
-    subgraph HOMESERVER [Local Infrastructure & Execution]
+    subgraph CLUSTER [Proxmox VE Cluster: Homelab Infrastructure]
         direction TB
 
-        subgraph APPS_OPS [Operational Trading Engine & State]
-            direction TB
-            CUANTUM[cuantum Trading Engine]
-            N8N[n8n Automations]
-            PG[(PostgreSQL 16 Operational)]
-            REDIS[(Redis 7 State Cache)]
+        subgraph ROW_CORE [Core Apps & Observability]
+            direction LR
 
-            CUANTUM <--> PG
-            CUANTUM <--> REDIS
-            N8N --> CUANTUM
+            subgraph APPS_OPS [Operational Trading Engine]
+                direction TB
+                CUANTUM[cuantum Trading Engine]
+                N8N[n8n Automations]
+                PG[(PostgreSQL 16)]
+                REDIS[(Redis 7 Cache)]
+                PAIRDROP[PairDrop P2P Transfer]
+
+                CUANTUM <--> PG
+                CUANTUM <--> REDIS
+                N8N --> CUANTUM
+            end
+
+            subgraph OBSERVABILITY [Telemetry & Observability]
+                direction TB
+                MONITORING_LXC[(LXC 207: Monitoring)]
+                PROM[Prometheus Scraper :9090]
+                GRAF[Grafana Dashboards :3000]
+                KUMA[Uptime Kuma Health :3001]
+                DISCORD_BOT[Discord Sentinel Bot<br/>#server-status]
+
+                MONITORING_LXC --> PROM
+                MONITORING_LXC --> GRAF
+                MONITORING_LXC --> KUMA
+                MONITORING_LXC --> DISCORD_BOT
+                PROM --> GRAF
+            end
         end
 
-        subgraph DATA_PLATFORM [Self-Hosted Streaming & Lakehouse Platform]
+        subgraph DATA_PLATFORM [Self-Hosted Streaming & Lakehouse]
             direction TB
-            
-            subgraph INGESTION_BUS [Ingestion & CDC Transport]
+
+            subgraph STREAM_ROW [Streaming & Transport Layer]
                 direction LR
-                DEBEZIUM[Debezium CDC Engine<br/>PostgreSQL Logical Replication WAL]
-                REDPANDA[Redpanda Cluster<br/>High-Throughput C++ Broker]
-                DEBEZIUM -->|Stream Avro / JSON Mutation Events| REDPANDA
+                DEBEZIUM[Debezium CDC Engine]
+                REDPANDA[Redpanda C++ Broker]
+                FLINK[Apache Flink Stream Engine]
+                DEBEZIUM --> REDPANDA --> FLINK
             end
 
-            FLINK[Apache Flink<br/>Event-Time Streaming Engine]
-            AIRFLOW[Apache Airflow<br/>Batch DAG Orchestrator]
-            
-            subgraph STORAGE_LAYER [Storage & Lake]
+            subgraph LAKE_ROW [Lakehouse, Compute & Serving]
                 direction LR
-                MINIO[(MinIO Object Lake<br/>Parquet & Delta Tables)]
-                CLICKHOUSE[(ClickHouse OLAP<br/>Columnar Analytics Warehouse)]
+                MINIO[(MinIO Object Lake)]
+                CLICKHOUSE[(ClickHouse OLAP)]
+                SPARK[Apache Spark on K8s]
+                DBT[dbt Core Models]
+                METABASE[Metabase BI]
+
+                MINIO <--> SPARK
+                SPARK -.-> CLICKHOUSE
+                DBT --> CLICKHOUSE
+                CLICKHOUSE --> METABASE
             end
 
-            SPARK[Apache Spark on K8s<br/>Distributed Batch Compute & ML]
-            DBT[dbt Core<br/>dbt-clickhouse Model Compiler]
-            METABASE[Metabase BI<br/>Operational Analytics Dashboards]
-
-            %% Streaming Pipeline
-            REDPANDA -->|Event Streams| FLINK
-            FLINK -->|Real-Time Analytics Marts| CLICKHOUSE
-            FLINK -->|Raw Event Bronze Sink| MINIO
-
-            %% Batch Orchestration & Processing
-            AIRFLOW -->|Schedule Batch & ML Runs| SPARK
-            AIRFLOW -->|Trigger Mart Transformations| DBT
-            SPARK <-->|Read / Write Delta Format| MINIO
-            SPARK -.->|Load Enriched Parquet| CLICKHOUSE
-
-            %% Transformation & Serving
-            DBT -->|Materialize Staging & Marts| CLICKHOUSE
-            CLICKHOUSE -->|Sub-Second SQL Queries| METABASE
+            FLINK --> CLICKHOUSE
+            FLINK --> MINIO
         end
 
         subgraph AI_KNOWLEDGE [Autonomous Systems & Knowledge Hub]
-            direction TB
-            HERMES[Hermes Multi-Agent Runtime]
-            ROUTER[Context & Model Gateway]
-            VAULT_MCP[vault-mcp Server]
-            NLM_MCP[notebooklm-fastmcp Server]
-            PROXMOX_MCP[proxmox-homelab-mcp Server]
-            WORKSTATION_MCP[workstation-remote-mcp Server]
-            OBSIDIAN[(Obsidian Second Brain)]
-            NLM_ENGINE[(NotebookLM Long-Context Engine)]
-            PVE_HOST[(Proxmox VE Cluster & LXCs)]
+            direction LR
+            HERMES[Hermes Agent Runtime]
+            ROUTER[9router Gateway]
+            VAULT_MCP[vault-mcp]
+            NLM_MCP[notebooklm-fastmcp]
+            PROXMOX_MCP[proxmox-homelab-mcp]
+            WORKSTATION_MCP[workstation-remote-mcp]
 
             HERMES --> ROUTER
             HERMES --> VAULT_MCP
             HERMES --> NLM_MCP
             HERMES --> PROXMOX_MCP
             HERMES --> WORKSTATION_MCP
-            VAULT_MCP <-->|Two-Tier Hybrid Search| OBSIDIAN
-            NLM_MCP <-->|Direct Ingest & Podcast Gen| NLM_ENGINE
-            PROXMOX_MCP <-->|LXC Lifecycle, Snapshots & Stats| PVE_HOST
-            HERMES -.->|Risk Evaluation & Execution Rules| CUANTUM
-        end
-
-        subgraph OBSERVABILITY [Homelab Telemetry & Observability]
-            direction TB
-            MONITORING_LXC[(LXC 207: Monitoring)]
-            PROM[Prometheus Scraper :9090]
-            GRAF[Grafana Dashboards :3000]
-            CADV[cAdvisor Container Stats :8080]
-            KUMA[Uptime Kuma Health :3001]
-            DISCORD_BOT[Discord Sentinel Bot<br/>#server-status]
-
-            MONITORING_LXC --> PROM
-            MONITORING_LXC --> GRAF
-            MONITORING_LXC --> CADV
-            MONITORING_LXC --> KUMA
-            MONITORING_LXC --> DISCORD_BOT
-            PVE_HOST -.->|Node Exporter :9100| PROM
-            CADV --> PROM
-            PROM --> GRAF
         end
     end
 
-    %% Ingestion into Broker & Apps
-    PG -.->|Logical WAL Log Decoding| DEBEZIUM
-    DUWIT_DB -.->|Edge Webhook / Change Feed| REDPANDA
-    CLOUD_FEEDS -->|Tickers, Order Books & Filings| REDPANDA
-    CLOUD_FEEDS -->|Direct Price Feeds & Trade Orders| CUANTUM
+    subgraph WORKSTATION [Remote Workstation]
+        MPDC_PC[MPDC-PC Windows 11]
+    end
 
-    %% Ingress Connections
-    CF -->|Public Web Access| CUANTUM
-    CF -->|Public Web Access| PAIRDROP[PairDrop P2P Transfer]
+    %% Cross-subgraph Data & Control Flow
+    SOURCES -->|Market Feeds| CUANTUM
+    SOURCES -->|Market Tickers| REDPANDA
+    DUWIT -.->|Webhook Sync| REDPANDA
+    PG -.->|Logical WAL Replication| DEBEZIUM
+
+    %% Ingress & Automation Lines
+    CF -->|Public Web| CUANTUM
+    CF -->|Public Web| PAIRDROP
     CF -->|Telemetry Dashboard| GRAF
-    CF -->|Gateway Access| ROUTER
-    TS -->|Private Tailnet Mesh| HOMESERVER
-    TS -->|Unattended Mgmt & WoL| MPDC_PC[MPDC-PC Workstation]
-    WORKSTATION_MCP <-->|WoL & SSH Automation| MPDC_PC
+    CF -->|Context Gateway| ROUTER
+    TS -->|Private Tailnet| CLUSTER
+    TS -->|Private Tailnet| MPDC_PC
+    WORKSTATION_MCP <-->|WoL & Remote Power| MPDC_PC
 ```
 
 ---
