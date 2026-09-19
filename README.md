@@ -12,7 +12,7 @@ MBA Candidate in Business Leadership Executive at SBM ITB. B.Eng. in Computer En
 
 ---
 
-### Systems Architecture
+### Personal Homeserver & Distributed Systems Architecture
 
 ```mermaid
 flowchart TB
@@ -23,6 +23,20 @@ flowchart TB
         DNS[AdGuard Home DNS]
     end
 
+    subgraph APPS_OPS [Operational Services & Transactional State]
+        direction TB
+        CUANTUM[cuantum]
+        DUWIT[duwit]
+        N8N[n8n Automations]
+        PG[(PostgreSQL 16)]
+        REDIS[(Redis 7)]
+
+        CUANTUM <--> PG
+        CUANTUM <--> REDIS
+        DUWIT --> PG
+        N8N --> CUANTUM
+    end
+
     subgraph DATA_PLATFORM [Data Platform: Streaming & Lakehouse]
         direction TB
         REDPANDA[Redpanda Cluster]
@@ -31,18 +45,22 @@ flowchart TB
         MINIO[(MinIO Object Store)]
         
         subgraph COMPUTE_SPLIT [Workload-Split Compute Engines]
-            SPARK[Apache Spark on K8s<br/>Data Engineering & Lake Pipelines]
+            SPARK[Apache Spark on K8s<br/>Data Engineering & Batch Pipelines]
             DATABRICKS[Databricks Lakehouse<br/>Distributed ML & Feature Store]
         end
         
         SNOWFLAKE[(Snowflake Warehouse<br/>Governed Semantic Marts)]
         METABASE[Metabase BI]
 
-        REDPANDA -->|Stream Events| FLINK
-        AIRFLOW -->|Orchestrate Pipelines| SPARK
-        AIRFLOW -->|Trigger ML Jobs| DATABRICKS
+        PG -.->|CDC / WAL Events| REDPANDA
+        REDPANDA -->|Stream Ingest| FLINK
+        FLINK -->|Real-time Features / Aggregations| DATABRICKS
+        FLINK -->|Curated Streaming Sinks| SNOWFLAKE
+        FLINK -->|Raw Parquet Sinks| MINIO
+        AIRFLOW -->|Orchestrate Batch DAGs| SPARK
+        AIRFLOW -->|Trigger Distributed ML| DATABRICKS
         SPARK -->|Medallion Parquet| MINIO
-        DATABRICKS -->|Delta Tables & ML Features| MINIO
+        DATABRICKS -->|Delta Tables & Model Store| MINIO
         SPARK -->|Load Cleaned Marts| SNOWFLAKE
         SNOWFLAKE -->|High-Concurrency SQL| METABASE
         MINIO --> METABASE
@@ -62,21 +80,7 @@ flowchart TB
         HERMES --> NLM_MCP
         VAULT_MCP <-->|Hybrid Search| OBSIDIAN
         NLM_MCP <-->|Document Ingest| NLM_ENGINE
-    end
-
-    subgraph APPS_OPS [Trading & Execution Services]
-        direction TB
-        CUANTUM[cuantum]
-        DUWIT[duwit]
-        N8N[n8n Automations]
-        PG[(PostgreSQL 16)]
-        REDIS[(Redis 7)]
-
-        CUANTUM <--> PG
-        CUANTUM <--> REDIS
-        FLINK -.->|Signals / Feeds| CUANTUM
-        HERMES -.->|Risk Evaluation| CUANTUM
-        N8N --> CUANTUM
+        HERMES -.->|Risk Rules & Analysis| CUANTUM
     end
 
     CF --> CUANTUM
@@ -92,8 +96,8 @@ flowchart TB
 
 #### Streaming & Lakehouse
 * **Hybrid Data Platform** — Dual-engine architecture with workload-split compute:
-  * **Event Streaming & Ingestion**: **Redpanda** (low-latency C++ event bus) and **Apache Airflow** (batch DAG orchestration).
-  * **Stream Analytics**: **Apache Flink** (stateful event-time surveillance and wash-trading detection).
+  * **Event Streaming & Ingestion**: **Redpanda** (low-latency C++ event bus ingesting CDC streams from PostgreSQL and trade feeds) and **Apache Airflow** (batch DAG orchestration).
+  * **Stream Processing**: **Apache Flink** (stateful event-time surveillance and real-time feature transformations feeding directly into Databricks and Snowflake).
   * **Workload-Split Compute (Databricks vs. Snowflake)**:
     * **Databricks / Spark**: Dedicated to **heavy distributed ML training, feature store parity, and iterative PySpark batch compute** on spot-instance clusters. Avoids Snowflake's high per-credit cost for long-running iterative algorithms.
     * **Snowflake**: Dedicated to **governed analytics data warehousing, high-concurrency SQL serving, and enterprise RBAC**. Eliminates compute lock-in by decoupling heavy data science training from business intelligence workloads.
