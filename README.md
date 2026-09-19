@@ -15,120 +15,156 @@ MBA Candidate in Business Leadership Executive at SBM ITB. B.Eng. in Computer En
 ### Personal Homeserver & Distributed Systems Architecture
 
 ```mermaid
-flowchart TB
-    subgraph INGRESS [Ingress, Edge & Mesh]
-        direction LR
-        CF[Cloudflare Tunnel]
-        TS[Tailscale Mesh]
-        DNS[AdGuard Home DNS]
-        DUWIT[duwit: Vercel Serverless & Postgres]
+flowchart TD
+    %% ==========================================
+    %% LEVEL 1: EXTERNAL FEEDS & INGRESS
+    %% ==========================================
+    subgraph S_EXT ["Level 1: Ingress, External Feeds & Mesh"]
+        direction TB
+        subgraph S_INGRESS ["Public Ingress, DNS & Private Mesh"]
+            direction LR
+            CF["Cloudflare Tunnel<br/>(cuantum, drop, grafana, router)"]
+            DNS["AdGuard Home DNS<br/>(LXC 204: Network-Wide Filter)"]
+            TS["Tailscale Private Mesh<br/>(WireGuard CGNAT 100.x)"]
+            CF --- DNS --- TS
+        end
+        subgraph S_FEEDS ["External Market Feeds & Edge Services"]
+            direction LR
+            FEEDS_CRYPTO["Binance & Bitget<br/>(CCXT / WebSocket)"]
+            FEEDS_MACRO["Yahoo Finance & IDX<br/>(Macro & Financial Reports)"]
+            DUWIT["duwit Edge Service<br/>(Vercel + Postgres)"]
+            FEEDS_CRYPTO --- FEEDS_MACRO --- DUWIT
+        end
     end
 
-    subgraph SOURCES [External Feeds]
+    %% ==========================================
+    %% LEVEL 2: TRADING, CORE APPS & OBSERVABILITY
+    %% ==========================================
+    subgraph S_CORE ["Level 2: Core Homelab Services & Observability"]
         direction LR
-        EX_CRYPTO[Binance & Bitget CCXT / WS]
-        EX_MACRO[Yahoo Finance & IDX Reports]
+
+        subgraph COL_TRADING ["Operational Trading & Utility (LXC 201, 202, 205)"]
+            direction TB
+            CUANTUM["cuantum Trading Engine<br/>(FastAPI + React Vite)"]
+            N8N["n8n Workflow Automations<br/>(LXC 202)"]
+            PAIRDROP["PairDrop Web P2P Transfer<br/>(LXC 202: drop.mpandudc.com)"]
+            PG[("PostgreSQL 16 Operational<br/>(LXC 205: trading db)")]
+            REDIS[("Redis 7 State Cache<br/>(LXC 205)")]
+
+            CUANTUM <--> PG
+            CUANTUM <--> REDIS
+            N8N --> CUANTUM
+            PAIRDROP
+        end
+
+        subgraph COL_OBS ["Observability & Telemetry (LXC 207)"]
+            direction TB
+            MONITOR_LXC[("LXC 207: Observability Hub")]
+            PROM["Prometheus Scraper (:9090)<br/>(15s Pull Interval)"]
+            GRAF["Grafana Dashboards (:3000)<br/>(grafana.mpandudc.com)"]
+            CADV["cAdvisor Container Stats (:8080)"]
+            KUMA["Uptime Kuma Health (:3001)"]
+            DISCORD["Discord Sentinel Bot<br/>(#server-status 1546523710889136259)"]
+
+            MONITOR_LXC --> PROM
+            MONITOR_LXC --> GRAF
+            MONITOR_LXC --> CADV
+            MONITOR_LXC --> KUMA
+            MONITOR_LXC --> DISCORD
+            CADV --> PROM
+            PROM --> GRAF
+        end
     end
 
-    subgraph CLUSTER [Proxmox VE Cluster: Homelab Infrastructure]
+    %% ==========================================
+    %% LEVEL 3: DATA PLATFORM & LAKEHOUSE
+    %% ==========================================
+    subgraph S_DATA ["Level 3: Self-Hosted Streaming & Lakehouse Platform (LXC 206)"]
         direction TB
 
-        subgraph ROW_CORE [Core Apps & Observability]
+        subgraph DP_INGEST ["1. Ingestion & CDC Transport Layer"]
             direction LR
-
-            subgraph APPS_OPS [Operational Trading Engine]
-                direction TB
-                CUANTUM[cuantum Trading Engine]
-                N8N[n8n Automations]
-                PG[(PostgreSQL 16)]
-                REDIS[(Redis 7 Cache)]
-                PAIRDROP[PairDrop P2P Transfer]
-
-                CUANTUM <--> PG
-                CUANTUM <--> REDIS
-                N8N --> CUANTUM
-            end
-
-            subgraph OBSERVABILITY [Telemetry & Observability]
-                direction TB
-                MONITORING_LXC[(LXC 207: Monitoring)]
-                PROM[Prometheus Scraper :9090]
-                GRAF[Grafana Dashboards :3000]
-                KUMA[Uptime Kuma Health :3001]
-                DISCORD_BOT[Discord Sentinel Bot<br/>#server-status]
-
-                MONITORING_LXC --> PROM
-                MONITORING_LXC --> GRAF
-                MONITORING_LXC --> KUMA
-                MONITORING_LXC --> DISCORD_BOT
-                PROM --> GRAF
-            end
+            DEBEZIUM["Debezium CDC Engine<br/>(PostgreSQL WAL Logical Decoding)"]
+            REDPANDA["Redpanda Cluster<br/>(High-Throughput C++ Broker)"]
+            DEBEZIUM -->|Stream Mutation Events| REDPANDA
         end
 
-        subgraph DATA_PLATFORM [Self-Hosted Streaming & Lakehouse]
+        subgraph DP_STREAM ["2. Stream Processing & Lake Storage Sinks"]
+            direction LR
+            FLINK["Apache Flink<br/>(Event-Time Stream Engine)"]
+            MINIO[("MinIO Object Lake<br/>(Parquet & Delta Format)")]
+            REDPANDA -->|Event Streams| FLINK
+            FLINK -->|Raw Bronze Sink| MINIO
+        end
+
+        subgraph DP_WAREHOUSE ["3. Distributed Compute, Transformation & BI Marts"]
             direction TB
-
-            subgraph STREAM_ROW [Streaming & Transport Layer]
+            subgraph COMPUTE_ROW ["Batch & Storage Engines"]
                 direction LR
-                DEBEZIUM[Debezium CDC Engine]
-                REDPANDA[Redpanda C++ Broker]
-                FLINK[Apache Flink Stream Engine]
-                DEBEZIUM --> REDPANDA --> FLINK
+                SPARK["Apache Spark on K8s<br/>(Batch Compute & Feature Eng)"]
+                AIRFLOW["Apache Airflow<br/>(Batch DAG Orchestrator)"]
+                CLICKHOUSE[("ClickHouse OLAP<br/>(Columnar Warehouse)")]
+                DBT["dbt Core Compiler<br/>(dbt-clickhouse Models)"]
+                METABASE["Metabase BI<br/>(Analytics Dashboards)"]
             end
 
-            subgraph LAKE_ROW [Lakehouse, Compute & Serving]
-                direction LR
-                MINIO[(MinIO Object Lake)]
-                CLICKHOUSE[(ClickHouse OLAP)]
-                SPARK[Apache Spark on K8s]
-                DBT[dbt Core Models]
-                METABASE[Metabase BI]
-
-                MINIO <--> SPARK
-                SPARK -.-> CLICKHOUSE
-                DBT --> CLICKHOUSE
-                CLICKHOUSE --> METABASE
-            end
-
-            FLINK --> CLICKHOUSE
-            FLINK --> MINIO
+            AIRFLOW -->|Schedule Runs| SPARK
+            AIRFLOW -->|Trigger Models| DBT
+            SPARK <-->|Read / Write Delta Format| MINIO
+            SPARK -.->|Load Enriched Parquet| CLICKHOUSE
+            FLINK -->|Real-Time Aggregates| CLICKHOUSE
+            DBT -->|Materialize Marts| CLICKHOUSE
+            CLICKHOUSE -->|Sub-Second Queries| METABASE
         end
+    end
 
-        subgraph AI_KNOWLEDGE [Autonomous Systems & Knowledge Hub]
-            direction LR
-            HERMES[Hermes Agent Runtime]
-            ROUTER[9router Gateway]
-            VAULT_MCP[vault-mcp]
-            NLM_MCP[notebooklm-fastmcp]
-            PROXMOX_MCP[proxmox-homelab-mcp]
-            WORKSTATION_MCP[workstation-remote-mcp]
+    %% ==========================================
+    %% LEVEL 4: AI RUNTIME & MCP ECOSYSTEM
+    %% ==========================================
+    subgraph S_AI ["Level 4: Autonomous Systems, Second Brain & Workstation Remote"]
+        direction LR
+
+        subgraph COL_AGENT ["Hermes Multi-Agent Stack (LXC 203)"]
+            direction TB
+            HERMES["Hermes Agent Runtime<br/>(@hermes, @coder, @quant)"]
+            ROUTER["9router Context Gateway<br/>(router.mpandudc.com)"]
+            OBSIDIAN[("Obsidian Second Brain<br/>(Hybrid Knowledge Graph)")]
+            NLM_ENGINE[("NotebookLM Engine<br/>(Google Gemini Long-Context)")]
+            PVE_API[("Proxmox VE Host<br/>(i5-8500T 6C/6T, 32GB RAM)")]
 
             HERMES --> ROUTER
-            HERMES --> VAULT_MCP
-            HERMES --> NLM_MCP
-            HERMES --> PROXMOX_MCP
-            HERMES --> WORKSTATION_MCP
+            HERMES -.->|Risk Rules & Signal Eval| CUANTUM
+        end
+
+        subgraph COL_MCP ["FastMCP Tools & Workstation Control"]
+            direction TB
+            VAULT_MCP["vault-mcp Server<br/>(Two-Tier Hybrid BM25 + BGE-M3)"]
+            NLM_MCP["notebooklm-fastmcp Server<br/>(Direct Ingest & Studio Audio)"]
+            PROXMOX_MCP["proxmox-homelab-mcp Server<br/>(pvesh API, Snapshots & Stats)"]
+            WORKSTATION_MCP["workstation-remote-mcp Server<br/>(WoL, SSH & Power Control)"]
+            MPDC_PC["MPDC-PC Workstation<br/>(Windows 11 Pro, RTX / CUDA)"]
+
+            HERMES --> VAULT_MCP <--> OBSIDIAN
+            HERMES --> NLM_MCP <--> NLM_ENGINE
+            HERMES --> PROXMOX_MCP <--> PVE_API
+            HERMES --> WORKSTATION_MCP <-->|WoL & Power API| MPDC_PC
         end
     end
 
-    subgraph WORKSTATION [Remote Workstation]
-        MPDC_PC[MPDC-PC Windows 11]
-    end
-
-    %% Cross-subgraph Data & Control Flow
-    SOURCES -->|Market Feeds| CUANTUM
-    SOURCES -->|Market Tickers| REDPANDA
-    DUWIT -.->|Webhook Sync| REDPANDA
+    %% ==========================================
+    %% CROSS-TIER DATA & INGRESS FLOWS
+    %% ==========================================
+    FEEDS_CRYPTO -->|Direct Price Feeds & Trade Orders| CUANTUM
+    FEEDS_CRYPTO -->|Market Tickers & Order Books| REDPANDA
+    DUWIT -.->|Webhook Sync / Change Feed| REDPANDA
     PG -.->|Logical WAL Replication| DEBEZIUM
-
-    %% Ingress & Automation Lines
-    CF -->|Public Web| CUANTUM
-    CF -->|Public Web| PAIRDROP
-    CF -->|Telemetry Dashboard| GRAF
-    CF -->|Context Gateway| ROUTER
-    TS -->|Private Tailnet| CLUSTER
-    TS -->|Private Tailnet| MPDC_PC
-    WORKSTATION_MCP <-->|WoL & Remote Power| MPDC_PC
+    PVE_API -.->|Node Exporter :9100| PROM
+    CF -->|Public Routing| CUANTUM
+    CF -->|Public Routing| PAIRDROP
+    CF -->|Public Routing| GRAF
+    CF -->|Public Routing| ROUTER
+    TS -->|Private Tailnet Mesh| S_CORE
+    TS -->|Private Tailnet Mesh| MPDC_PC
 ```
 
 ---
