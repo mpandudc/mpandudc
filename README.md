@@ -2,7 +2,7 @@
 
 <p align="left">
   <a href="https://linkedin.com/in/mpandudc"><img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=flat&logo=linkedin&logoColor=white" alt="LinkedIn" /></a>
-  <a href="https://mpandudc.com"><img src="https://img.shields.io/badge/Website-mpandudc.com-2ea44f?style=flat&logo=google-chrome&logoColor=white" alt="Website" /></a>
+  <a href="https://cahyo.tech"><img src="https://img.shields.io/badge/Website-cahyo.tech-2ea44f?style=flat&logo=google-chrome&logoColor=white" alt="Website" /></a>
   <a href="mailto:mpandudc%40gmail.com"><img src="https://img.shields.io/badge/Email-mpandudc%40gmail.com-blue?style=flat&logo=gmail&logoColor=white" alt="Email" /></a>
 </p>
 
